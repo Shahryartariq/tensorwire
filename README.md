@@ -24,6 +24,7 @@ Today's AI news on one page. Tensorwire reads 18 feeds, from AI labs, newsrooms 
 - **A page per source** and a [sources page](https://tensorwire.vercel.app/sources) showing whether each feed loaded on its last check.
 - **Search** across headlines and summaries from the last three weeks.
 - **New since your last visit:** stories that arrived since you last looked are marked. Only a timestamp is stored, in your browser.
+- **Light, dark or system theme:** switch in the header. Your choice is saved in your browser and applied before the page paints, so a dark page never flashes white. Without a choice, the site follows your system setting.
 - **Its own [RSS feed](https://tensorwire.vercel.app/feed.xml)** with each story once.
 - **Light and dark themes**, and it works without JavaScript.
 
@@ -44,7 +45,7 @@ Tensorwire shows each story's headline, a short excerpt when the feed provides o
 | UI | React 19, hand-written CSS, Schibsted Grotesk self-hosted from npm |
 | Feeds | RSS 2.0, RSS 1.0 and Atom parsed with [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser); text cleaned with [entities](https://github.com/fb55/entities) |
 | Caching | `unstable_cache` per feed, 15 minutes, on the Vercel Data Cache |
-| Tests | Vitest (53 unit and API tests), Playwright (42 end-to-end runs on desktop and mobile), axe-core accessibility checks |
+| Tests | Vitest (58 unit and API tests), Playwright (56 end-to-end runs on desktop and mobile), axe-core accessibility checks |
 | CI | GitHub Actions: lint, type check, unit tests, build, end-to-end tests |
 | Hosting | Vercel |
 

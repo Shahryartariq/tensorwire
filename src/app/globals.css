@@ -45,8 +45,14 @@
   color-scheme: light dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+/*
+ * Dark theme. It applies when the system is dark and the reader hasn't chosen light, or when the
+ * reader chose dark (src/components/ThemeSwitch.tsx). The two blocks must stay identical; a unit
+ * test checks. Both are screen-only, so printing always uses the light colours.
+ */
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --paper: #0a0f22;
     --surface: #111834;
     --ink: #e8ecf7;
@@ -68,6 +74,36 @@
     --official-bg: rgb(67 207 165 / 0.12);
     --warn: #fdba74;
   }
+}
+
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #0a0f22;
+    --surface: #111834;
+    --ink: #e8ecf7;
+    --muted: #a3acc8;
+    --rule: #232c52;
+    --visited: #a59fd6;
+
+    --band: #060a19;
+    --band-rule: #1e2747;
+    --band-field: #121a38;
+
+    --highlight: rgb(255 225 77 / 0.32);
+
+    --cell-off: #2a3358;
+    --cell-on: #e8ecf7;
+    --band-cell-off: #2a3358;
+
+    --official: #43cfa5;
+    --official-bg: rgb(67 207 165 / 0.12);
+    --warn: #fdba74;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 *,
@@ -216,6 +252,7 @@ main:focus {
   display: flex;
   flex: 1 1 18rem;
   max-width: 26rem;
+  margin-left: auto;
 }
 
 .search input {
@@ -263,6 +300,57 @@ main:focus {
   background: transparent;
   color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+/* Light / dark / system: three icon radios in the masthead. */
+.theme-switch {
+  display: inline-flex;
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  min-inline-size: 0;
+  background: var(--band-field);
+  border: 1px solid var(--band-rule);
+  border-radius: 8px;
+  /* It needs JavaScript, so it stays invisible (but keeps its space) until the page hydrates. */
+  visibility: hidden;
+}
+
+.theme-switch[data-ready] {
+  visibility: visible;
+}
+
+.theme-switch label {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  color: var(--band-muted);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.theme-switch svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-switch label:hover {
+  color: var(--band-ink);
+}
+
+.theme-switch label:has(:checked) {
+  color: var(--mark-ink);
+  background: var(--mark);
+}
+
+.theme-switch label:has(:focus-visible) {
+  outline: 3px solid var(--mark);
+  outline-offset: 2px;
 }
 
 .sections {
@@ -1022,9 +1110,16 @@ main:focus {
 /* ---------- Small screens ---------- */
 
 @media (max-width: 40rem) {
+  /* Brand and theme switch share the first row; search takes the full second row. */
   .search {
     flex-basis: 100%;
     max-width: none;
+    margin-left: 0;
+    order: 1;
+  }
+
+  .theme-switch {
+    margin-left: auto;
   }
 
   .story {

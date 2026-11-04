@@ -247,6 +247,96 @@ test.describe("security", () => {
   });
 });
 
+test.describe("theme", () => {
+  const background = (page: Page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const LIGHT = "rgb(243, 245, 249)";
+  const DARK = "rgb(10, 15, 34)";
+
+  test("follows the system until the reader picks a theme, and remembers the choice", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    const theme = page.getByRole("group", { name: "Theme" });
+    await expect(theme.getByRole("radio", { name: "System" })).toBeChecked();
+    expect(await background(page)).toBe(LIGHT);
+
+    await theme.getByTitle("Dark theme").click();
+    await expect(theme.getByRole("radio", { name: "Dark" })).toBeChecked();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(await background(page)).toBe(DARK);
+    expect(await page.evaluate(() => localStorage.getItem("tensorwire:theme"))).toBe("dark");
+    await expect(page.locator('meta[name="theme-color"]').first()).toHaveAttribute("content", "#0A0F22");
+
+    // The choice survives a reload and a visit to another page.
+    await page.reload();
+    await expect(page.getByRole("radio", { name: "Dark" })).toBeChecked();
+    await page.getByRole("link", { name: "Sources", exact: true }).click();
+    await expect(page).toHaveURL(/\/sources$/);
+    expect(await background(page)).toBe(DARK);
+
+    // Back to the system setting: the saved choice is removed.
+    await page.getByRole("group", { name: "Theme" }).getByTitle("System theme").click();
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme");
+    expect(await page.evaluate(() => localStorage.getItem("tensorwire:theme"))).toBeNull();
+    expect(await background(page)).toBe(LIGHT);
+  });
+
+  test("a light choice wins over a dark system", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/");
+    expect(await background(page)).toBe(DARK);
+    await page.getByRole("group", { name: "Theme" }).getByTitle("Light theme").click();
+    expect(await background(page)).toBe(LIGHT);
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toBe("light");
+  });
+
+  test("applies a saved theme before the page's JavaScript runs", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("tensorwire:theme", "dark"));
+    // Block the app's scripts: only the inline head script can set the theme now.
+    await page.route("**/_next/static/**/*.js", (route) => route.abort());
+    page.removeAllListeners("console");
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(await background(page)).toBe(DARK);
+    // Without the app's JavaScript the switch can't work, so it isn't shown.
+    await expect(page.getByRole("group", { name: "Theme" })).toBeHidden();
+  });
+
+  test("a choice made in another tab applies here too", async ({ page, context }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    await expect(page.locator(".theme-switch[data-ready]")).toBeVisible();
+    const other = await context.newPage();
+    await other.goto("/about");
+    await other.getByRole("group", { name: "Theme" }).getByTitle("Dark theme").click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await expect(page.getByRole("radio", { name: "Dark" })).toBeChecked();
+    await other.close();
+  });
+
+  test("works from the keyboard", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Keyboard navigation is a desktop check");
+    await page.goto("/");
+    await page.getByRole("radio", { name: "System" }).focus();
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.getByRole("radio", { name: "Dark" })).toBeChecked();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  });
+
+  for (const scheme of ["dark", "light"] as const) {
+    test(`is accessible in the ${scheme} theme and fits the screen`, async ({ page }) => {
+      await page.addInitScript((value) => localStorage.setItem("tensorwire:theme", value), scheme);
+      await page.emulateMedia({ colorScheme: scheme === "dark" ? "light" : "dark" });
+      for (const path of ["/", "/topic/models", "/sources", "/search?q=model", "/no-such-page"]) {
+        await page.goto(path);
+        await expect(page.locator("html")).toHaveAttribute("data-theme", scheme);
+        await expectAccessible(page);
+        await noHorizontalScroll(page);
+      }
+    });
+  }
+});
+
 test("works without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
