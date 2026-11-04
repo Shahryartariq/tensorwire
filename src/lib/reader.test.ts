@@ -56,7 +56,7 @@ describe("reader view: cleaning feed HTML", () => {
 
   it("drops empty paragraphs and feed boilerplate", () => {
     const { html } = cleanArticle(
-      `<p>Real text.</p><p> </p><p>The post Hello appeared first on Example News.</p><p>Continue reading…</p><p>Read more</p>`,
+      `<p>Real text.</p><p> </p><p>The post Hello appeared first on Example News.</p><p>Continue reading…</p><p>Read more</p><p><a href="/a">Read full article</a></p><p><a href="/a#comments">Comments</a></p>`,
       URL_,
     );
     expect(html).toBe("<p>Real text.</p>");
@@ -76,6 +76,22 @@ describe("reader view: which stories can be read here", () => {
     expect(readingMinutes(`<p>${words(READABLE_WORDS - 1)}</p>`)).toBeUndefined();
     expect(readingMinutes(`<p>${words(READABLE_WORDS)}</p>`)).toBe(1);
     expect(readingMinutes(`<p>${words(1150)}</p>`)).toBe(5);
+  });
+
+  it("leaves out posts the feed cuts off with a link to the rest", () => {
+    const body = `<p>${words(400)}</p>`;
+    for (const ending of [
+      '<p><a href="https://example.com/a">Read full article</a></p><p><a href="https://example.com/a#comments">Comments</a></p>',
+      "<p>Continue reading on Example →</p>",
+      '<p><a href="https://example.com/a">Read the rest of this post</a></p>',
+      "<p>and then the story went on […]</p>",
+      "<p>and then the story went on…</p>",
+    ]) {
+      expect(readingMinutes(body + ending), ending).toBeUndefined();
+    }
+    // A whole post with the usual WordPress trailer is still readable.
+    expect(readingMinutes(`${body}<p>The post Example appeared first on Example News.</p>`)).toBe(2);
+    expect(readingMinutes(`${body}<p>Read more about the project on its site, which has documentation and downloads.</p><p>${words(50)}</p>`)).toBe(2);
   });
 
   it("takes the fullest text from RSS content:encoded or Atom content", () => {
