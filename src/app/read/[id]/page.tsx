@@ -3,7 +3,7 @@ import "@fontsource-variable/source-serif-4/wght-italic.css";
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { Mark } from "@/components/Mark";
 import { ReaderControls } from "@/components/ReaderControls";
@@ -39,7 +39,8 @@ export default async function ReaderPage({ params }: PageProps<"/read/[id]">) {
   const story = await findStory((await params).id);
   if (!story) notFound();
   const article = await getArticle(story.source, story.url);
-  if (!article) notFound();
+  // The feed changed or didn't load since the list was built: the original is the next best thing.
+  if (!article) redirect(story.url);
   const source = sourceBySlug(story.source);
   const name = sourceName(story.source);
   const iso = new Date(story.publishedAt).toISOString();

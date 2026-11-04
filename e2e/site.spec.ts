@@ -423,6 +423,26 @@ test.describe("reader view", () => {
     await expect(larger).toBeDisabled();
   });
 
+  test("a story without its text in the feed sends you to the original", async ({ page, request }) => {
+    await page.goto("/");
+    // Story ids are derived from the article URL; take a row without a reader link.
+    const row = page.locator(".story", { hasNot: page.locator(".reader-link") }).first();
+    const url = await row.locator(".story-title a").getAttribute("href");
+    const id = await page.evaluate(async (href) => {
+      const u = new URL(href!);
+      const key = `${u.hostname.replace(/^www\./, "")}${u.pathname.replace(/\/+$/, "") || "/"}${u.search}`.toLowerCase();
+      let hash = 0x811c9dc5;
+      for (let i = 0; i < key.length; i++) {
+        hash ^= key.charCodeAt(i);
+        hash = Math.imul(hash, 0x01000193);
+      }
+      return (hash >>> 0).toString(36);
+    }, url);
+    const response = await request.get(`/read/${id}`, { maxRedirects: 0 });
+    expect(response.status()).toBe(307);
+    expect(response.headers().location).toBe(url);
+  });
+
   test("unknown or expired stories return 404", async ({ request }) => {
     for (const path of ["/read/zzzzzzz", "/read/not-an-id!"]) {
       expect((await request.get(path)).status(), path).toBe(404);

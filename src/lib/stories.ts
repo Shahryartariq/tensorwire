@@ -44,7 +44,7 @@ export function toStories(source: Source, items: RawItem[], now: number): Story[
 
     const summary = source.summaries !== false && usefulSummary(text, title, categories) ? excerpt(text) : undefined;
     const discussion = safeUrl(item.comments) ?? undefined;
-    const read = readingMinutes(item.body);
+    const read = readingMinutes(item.body, url);
 
     stories.push({
       id: hashId(key),

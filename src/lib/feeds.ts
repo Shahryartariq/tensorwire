@@ -75,7 +75,7 @@ async function readArticle(slug: string, url: string): Promise<ReaderText | null
     const link = safeUrl(i.link, source.homepage);
     return link !== null && urlKey(link) === key;
   });
-  if (!item?.body || !readingMinutes(item.body)) return null;
+  if (!item?.body || !readingMinutes(item.body, url)) return null;
   return cleanArticle(item.body, url);
 }
 
