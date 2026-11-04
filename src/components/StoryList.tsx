@@ -1,7 +1,7 @@
 import { sourceBySlug, sourceName } from "@/lib/sources";
 import { ago, agoLong, bucketize, formatDate } from "@/lib/time";
 import { topicBySlug } from "@/lib/topics";
-import type { Cluster } from "@/lib/types";
+import type { Cluster, Story } from "@/lib/types";
 
 import { Coverage } from "./Coverage";
 
@@ -19,6 +19,8 @@ export function StoryRow({ cluster, now }: { cluster: Cluster; now: number }) {
   const { lead } = cluster;
   const source = sourceBySlug(lead.source);
   const others = cluster.stories.slice(1);
+  // The reader view needs a feed that carries the post's text; the lead's, or another report's.
+  const readable = cluster.stories.find((story) => story.read);
   // The time column shows the latest report, which is also how the wire is ordered.
   const iso = new Date(cluster.latest).toISOString();
   return (
@@ -38,6 +40,7 @@ export function StoryRow({ cluster, now }: { cluster: Cluster; now: number }) {
             {sourceName(lead.source)}
           </a>
           {source?.kind === "lab" && <span className="official">Official</span>}
+          {readable && <ReaderLink story={readable} showSource={readable !== lead} />}
           {others.length > 0 && (
             <span className="also">
               Also in{" "}
@@ -67,6 +70,19 @@ export function StoryRow({ cluster, now }: { cluster: Cluster; now: number }) {
         </div>
       </div>
     </li>
+  );
+}
+
+/** "Read here · 4 min": opens the reader view with the text from the feed. */
+export function ReaderLink({ story, showSource = false }: { story: Story; showSource?: boolean }) {
+  return (
+    <a href={`/read/${story.id}`} className="reader-link">
+      Read here
+      {showSource && <> from {sourceName(story.source)}</>}
+      <span aria-hidden="true"> · </span>
+      <span className="visually-hidden">, </span>
+      {story.read} min
+    </a>
   );
 }
 

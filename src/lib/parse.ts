@@ -71,12 +71,23 @@ function link(obj: Record<string, unknown>): string {
   return permalink === "false" ? "" : text(guid);
 }
 
+/**
+ * The fullest text the item carries, as HTML: RSS content:encoded or Atom content when present
+ * (often the whole post), otherwise the description or summary. Used only by the reader view.
+ */
+function body(obj: Record<string, unknown>): string {
+  const full = text(first(obj, ["content:encoded", "content"]));
+  const short = text(first(obj, ["description", "summary"]));
+  return full.length >= short.length ? full : short;
+}
+
 function toItem(obj: Record<string, unknown>): RawItem {
   return {
     title: text(obj.title as Node),
     link: link(obj),
     date: date(obj),
     summary: text(first(obj, ["description", "summary", "content:encoded", "content"])),
+    body: body(obj),
     categories: categories(obj),
     comments: text(obj.comments as Node) || undefined,
   };
