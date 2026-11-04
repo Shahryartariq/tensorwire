@@ -31,13 +31,15 @@ export default function AboutPage() {
         <h2>Where the news comes from</h2>
         <p>
           Tensorwire reads the public RSS and Atom feeds of {SOURCES.length} <Link href="/sources">sources</Link>: lab
-          and company blogs such as OpenAI, Google DeepMind and Hugging Face, newsrooms such as TechCrunch, The Verge and
-          MIT Technology Review, and independent builders such as Simon Willison and Latent Space. Each feed is read again
-          every 15 minutes.
+          and company blogs such as OpenAI, Google DeepMind, Apple and Hugging Face, newsrooms such as TechCrunch, The
+          Verge, IEEE Spectrum and MIT Technology Review, and independent writers such as Simon Willison, Nathan Lambert
+          and Ethan Mollick. Each feed is read again every 15 minutes.
         </p>
         <p>
           For each story you see the headline, a short excerpt when the feed provides one, the source and the time. The
-          headline links to the original article. Tensorwire never copies full articles.
+          headline links to the original article. When a publisher&apos;s own feed carries the whole post, you can also read
+          it here in the reader view, always with a link to the original. Tensorwire never copies articles from
+          publishers&apos; websites.
         </p>
 
         <h2>How stories are grouped</h2>

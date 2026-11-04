@@ -245,7 +245,8 @@ export const SOURCES: Source[] = [
     homepage: "https://www.zdnet.com/topic/artificial-intelligence/",
     feed: "https://www.zdnet.com/topic/artificial-intelligence/rss.xml",
     kind: "press",
-    about: "ZDNET's artificial intelligence coverage: news, reviews and how-tos.",
+    about: "ZDNET's artificial intelligence coverage: news, reviews and how-tos. Stories not about AI are left out.",
+    include: mentionsAi,
   },
   {
     slug: "ieee-spectrum",
@@ -278,14 +279,6 @@ export const SOURCES: Source[] = [
     feed: "https://feed.infoq.com/ai-ml-data-eng/",
     kind: "press",
     about: "AI, machine learning and data engineering news for software developers.",
-  },
-  {
-    slug: "ai-business",
-    name: "AI Business",
-    homepage: "https://aibusiness.com/",
-    feed: "https://aibusiness.com/rss.xml",
-    kind: "press",
-    about: "News on how companies adopt and build AI.",
   },
   {
     slug: "unite-ai",
@@ -446,14 +439,6 @@ export const SOURCES: Source[] = [
     about: "Gary Marcus's critical takes on AI progress, hype and policy.",
   },
   {
-    slug: "dwarkesh",
-    name: "Dwarkesh Podcast",
-    homepage: "https://www.dwarkesh.com/",
-    feed: "https://www.dwarkesh.com/feed",
-    kind: "builder",
-    about: "Long interviews with AI researchers and founders, with transcripts.",
-  },
-  {
     slug: "semianalysis",
     name: "SemiAnalysis",
     homepage: "https://newsletter.semianalysis.com/",
@@ -500,7 +485,8 @@ export const SOURCES: Source[] = [
     homepage: "https://thezvi.substack.com/",
     feed: "https://thezvi.substack.com/feed",
     kind: "builder",
-    about: "Zvi Mowshowitz's long weekly AI round-ups and essays. Round-ups never join a story group.",
+    about: "Zvi Mowshowitz's long weekly AI round-ups. His posts on other subjects are left out, and round-ups never join a story group.",
+    include: mentionsAi,
     digest: true,
   },
   {
