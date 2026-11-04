@@ -133,6 +133,9 @@ test.describe("sections", () => {
     await page.goto("/sources");
     await expect(page.locator(".source-list li")).toHaveCount(18);
     await expect(page.locator(".source-status .ok")).toHaveCount(18);
+    // Which feeds carry full posts for the reader view.
+    await expect(page.locator(".source-status", { hasText: "with the full post, readable here" }).first()).toBeVisible();
+    await expect(page.locator(".source-status", { hasText: "Summaries only" }).first()).toBeVisible();
     await expectAccessible(page);
   });
 
@@ -335,6 +338,116 @@ test.describe("theme", () => {
       }
     });
   }
+});
+
+test.describe("reader view", () => {
+  // In the sample data, the lead story's feed carries full text; most stories carry only a summary.
+  async function openReader(page: Page) {
+    await page.goto("/");
+    const link = page.locator(".lead").getByRole("link", { name: /Read here/ });
+    await expect(link).toContainText(/\d+ min/);
+    await link.click();
+    await expect(page).toHaveURL(/\/read\/[a-z0-9]+$/);
+  }
+
+  test("offers the reader view only where the feed has the post's text", async ({ page }) => {
+    await page.goto("/");
+    const links = page.getByRole("link", { name: /Read here/ });
+    expect(await links.count()).toBeGreaterThan(0);
+    expect(await links.count()).toBeLessThan(await page.locator(".story").count());
+  });
+
+  test("shows the post with nothing else around it", async ({ page }) => {
+    await openReader(page);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("FlashProve");
+    await expect(page.getByText(/\d+ min read/)).toBeVisible();
+    const body = page.locator(".reader-body");
+    await expect(body.getByRole("heading", { name: "What changes" })).toBeVisible();
+    await expect(body.getByRole("listitem")).toHaveCount(3);
+    // No site navigation, search, sidebar or footer.
+    await expect(page.getByRole("navigation")).toHaveCount(0);
+    await expect(page.getByRole("search")).toHaveCount(0);
+    await expect(page.locator(".column-side, .footer")).toHaveCount(0);
+    // A way back, and the original.
+    await expect(page.getByRole("link", { name: "Back to Tensorwire" })).toHaveAttribute("href", "/");
+    await expect(page.getByRole("link", { name: "Read it on MarkTechPost" })).toHaveAttribute("href", /marktechpost\.com/);
+    await expect(page.getByText("Images, videos and embeds are on the original post.")).toBeVisible();
+  });
+
+  test("keeps only safe text from the feed", async ({ page }) => {
+    await openReader(page);
+    const body = page.locator(".reader-body");
+    await expect(body.locator("script, style, iframe, img, figure, [onclick], [style]")).toHaveCount(0);
+    await expect(body).not.toContainText("Figure 1");
+    await expect(body).not.toContainText("appeared first on");
+    expect(await page.title()).not.toBe("hacked");
+    // Relative links point at the publisher's site and don't pass on ranking.
+    const related = body.getByRole("link", { name: "A related post" });
+    await expect(related).toHaveAttribute("href", "https://www.marktechpost.com/related-post");
+    await expect(related).toHaveAttribute("rel", "nofollow noopener noreferrer");
+  });
+
+  test("is kept out of search engines, which should find the publisher's page", async ({ page }) => {
+    await openReader(page);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /marktechpost\.com/);
+    const sitemap = await (await page.request.get("/sitemap.xml")).text();
+    expect(sitemap).not.toContain("/read/");
+  });
+
+  test("remembers text size and typeface, applied before the page paints", async ({ page }) => {
+    await openReader(page);
+    const size = () => page.locator(".reader-body").evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    const before = await size();
+    await page.getByRole("button", { name: "Larger text" }).click();
+    expect(await size()).toBeGreaterThan(before);
+    await page.getByRole("group", { name: "Typeface" }).getByTitle("Sans-serif typeface").click();
+    await expect(page.locator("html")).toHaveAttribute("data-reader-font", "sans");
+
+    // Reload with the app's scripts blocked: the head script alone restores both settings.
+    await page.route("**/_next/static/**/*.js", (route) => route.abort());
+    page.removeAllListeners("console");
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-reader-size", "l");
+    await expect(page.locator("html")).toHaveAttribute("data-reader-font", "sans");
+    expect(await size()).toBeGreaterThan(before);
+  });
+
+  test("text size stops at the smallest and largest steps", async ({ page }) => {
+    await openReader(page);
+    const smaller = page.getByRole("button", { name: "Smaller text" });
+    await smaller.click();
+    await expect(smaller).toBeDisabled();
+    const larger = page.getByRole("button", { name: "Larger text" });
+    for (let i = 0; i < 3; i++) await larger.click();
+    await expect(larger).toBeDisabled();
+  });
+
+  test("unknown or expired stories return 404", async ({ request }) => {
+    for (const path of ["/read/zzzzzzz", "/read/not-an-id!"]) {
+      expect((await request.get(path)).status(), path).toBe(404);
+    }
+  });
+
+  for (const scheme of ["light", "dark"] as const) {
+    test(`is accessible in the ${scheme} theme and fits the screen`, async ({ page }) => {
+      await page.addInitScript((value) => localStorage.setItem("tensorwire:theme", value), scheme);
+      await openReader(page);
+      await expect(page.locator(".reader-controls[data-ready]")).toBeVisible();
+      await expectAccessible(page);
+      await noHorizontalScroll(page);
+    });
+  }
+
+  test("can be read without JavaScript", async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto("/");
+    await page.locator(".lead").getByRole("link", { name: /Read here/ }).click();
+    await expect(page.locator(".reader-body")).toContainText("sample text");
+    await expect(page.getByRole("button", { name: "Larger text" })).toBeHidden();
+    await context.close();
+  });
 });
 
 test("works without JavaScript", async ({ browser }) => {

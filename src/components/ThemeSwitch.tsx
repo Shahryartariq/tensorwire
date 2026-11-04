@@ -86,7 +86,7 @@ const OPTIONS: { value: Theme; label: string; icon: React.ReactNode }[] = [
  * Light, dark or system theme, as a radio group: arrow keys move between the options, and screen
  * readers announce "Theme, radio group". Hidden until hydrated, because it can't work without JavaScript.
  */
-export function ThemeSwitch() {
+export function ThemeSwitch({ tone = "band" }: { tone?: "band" | "paper" }) {
   const theme = useSyncExternalStore(subscribe, readTheme, () => "system" as Theme);
   const hydrated = useSyncExternalStore(noop, () => true, () => false);
 
@@ -98,7 +98,7 @@ export function ThemeSwitch() {
   }, []);
 
   return (
-    <fieldset className="theme-switch" data-ready={hydrated || undefined}>
+    <fieldset className={tone === "paper" ? "theme-switch is-paper" : "theme-switch"} data-ready={hydrated || undefined}>
       <legend className="visually-hidden">Theme</legend>
       {OPTIONS.map((option) => (
         <label key={option.value} title={`${option.label} theme`}>
