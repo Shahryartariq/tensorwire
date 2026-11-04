@@ -63,7 +63,7 @@ describe("reader view: cleaning feed HTML", () => {
 
   it("drops empty paragraphs and feed boilerplate", () => {
     const { html } = cleanArticle(
-      `<p>Real text.</p><p> </p><p>The post Hello appeared first on Example News.</p><p>Continue reading…</p><p>Read more</p><p><a href="/a">Read full article</a></p><p><a href="/a#comments">Comments</a></p>`,
+      `<p>Real text.</p><p> </p><p>The post Hello appeared first on Example News.</p><p>Continue reading…</p><p>Read more</p><p><a href="/a">Read full article</a></p><p><a href="/a#comments">Comments</a></p><p>This post Example Title first appeared on Example Magazine and is written by A. Writer.</p>`,
       URL_,
     );
     expect(html).toBe("<p>Real text.</p>");

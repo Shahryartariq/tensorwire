@@ -27,7 +27,7 @@ export function isCutOff(text: string): boolean {
 }
 
 /** Feeds often end posts with a link back to themselves; the reader page has its own. */
-const BOILERPLATE = /^(the post .+ appeared first on .+|continue reading.*|read more.*|read (the )?full (story|article|post).*|comments|\(?source\)?:?)$/i;
+const BOILERPLATE = /^(the post .+ appeared first on .+|this (post|article) .+ (first appeared|appeared first|was first published) on .+|continue reading.*|read more.*|read (the )?full (story|article|post).*|comments|\(?source\)?:?)$/i;
 
 /** Screen-reader hints some sites put inside link text; the reader view's links don't open new tabs. */
 const NEW_TAB = /\s*\(?\s*opens in (a )?new (tab|window)\s*\)?/gi;
