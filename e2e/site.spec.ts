@@ -133,6 +133,9 @@ test.describe("sections", () => {
     await page.goto("/sources");
     await expect(page.locator(".source-list li")).toHaveCount(18);
     await expect(page.locator(".source-status .ok")).toHaveCount(18);
+    // Which feeds carry full posts for the reader view.
+    await expect(page.locator(".source-status", { hasText: "with the full post, readable here" }).first()).toBeVisible();
+    await expect(page.locator(".source-status", { hasText: "Summaries only" }).first()).toBeVisible();
     await expectAccessible(page);
   });
 
@@ -244,6 +247,226 @@ test.describe("security", () => {
     const hrefs = await page.locator(".story-title a, .lead-title a").evaluateAll((links) => links.map((a) => a.getAttribute("href")));
     expect(hrefs.length).toBeGreaterThan(40);
     expect(hrefs.every((href) => /^https?:\/\//.test(href!))).toBe(true);
+  });
+});
+
+test.describe("theme", () => {
+  const background = (page: Page) => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const LIGHT = "rgb(243, 245, 249)";
+  const DARK = "rgb(10, 15, 34)";
+
+  test("follows the system until the reader picks a theme, and remembers the choice", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    const theme = page.getByRole("group", { name: "Theme" });
+    await expect(theme.getByRole("radio", { name: "System" })).toBeChecked();
+    expect(await background(page)).toBe(LIGHT);
+
+    await theme.getByTitle("Dark theme").click();
+    await expect(theme.getByRole("radio", { name: "Dark" })).toBeChecked();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(await background(page)).toBe(DARK);
+    expect(await page.evaluate(() => localStorage.getItem("tensorwire:theme"))).toBe("dark");
+    await expect(page.locator('meta[name="theme-color"]').first()).toHaveAttribute("content", "#0A0F22");
+
+    // The choice survives a reload and a visit to another page.
+    await page.reload();
+    await expect(page.getByRole("radio", { name: "Dark" })).toBeChecked();
+    await page.getByRole("link", { name: "Sources", exact: true }).click();
+    await expect(page).toHaveURL(/\/sources$/);
+    expect(await background(page)).toBe(DARK);
+
+    // Back to the system setting: the saved choice is removed.
+    await page.getByRole("group", { name: "Theme" }).getByTitle("System theme").click();
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme");
+    expect(await page.evaluate(() => localStorage.getItem("tensorwire:theme"))).toBeNull();
+    expect(await background(page)).toBe(LIGHT);
+  });
+
+  test("a light choice wins over a dark system", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/");
+    expect(await background(page)).toBe(DARK);
+    await page.getByRole("group", { name: "Theme" }).getByTitle("Light theme").click();
+    expect(await background(page)).toBe(LIGHT);
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toBe("light");
+  });
+
+  test("applies a saved theme before the page's JavaScript runs", async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem("tensorwire:theme", "dark"));
+    // Block the app's scripts: only the inline head script can set the theme now.
+    await page.route("**/_next/static/**/*.js", (route) => route.abort());
+    page.removeAllListeners("console");
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(await background(page)).toBe(DARK);
+    // Without the app's JavaScript the switch can't work, so it isn't shown.
+    await expect(page.getByRole("group", { name: "Theme" })).toBeHidden();
+  });
+
+  test("a choice made in another tab applies here too", async ({ page, context }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/");
+    await expect(page.locator(".theme-switch[data-ready]")).toBeVisible();
+    const other = await context.newPage();
+    await other.goto("/about");
+    await other.getByRole("group", { name: "Theme" }).getByTitle("Dark theme").click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await expect(page.getByRole("radio", { name: "Dark" })).toBeChecked();
+    await other.close();
+  });
+
+  test("works from the keyboard", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Keyboard navigation is a desktop check");
+    await page.goto("/");
+    await page.getByRole("radio", { name: "System" }).focus();
+    await page.keyboard.press("ArrowLeft");
+    await expect(page.getByRole("radio", { name: "Dark" })).toBeChecked();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  });
+
+  for (const scheme of ["dark", "light"] as const) {
+    test(`is accessible in the ${scheme} theme and fits the screen`, async ({ page }) => {
+      await page.addInitScript((value) => localStorage.setItem("tensorwire:theme", value), scheme);
+      await page.emulateMedia({ colorScheme: scheme === "dark" ? "light" : "dark" });
+      for (const path of ["/", "/topic/models", "/sources", "/search?q=model", "/no-such-page"]) {
+        await page.goto(path);
+        await expect(page.locator("html")).toHaveAttribute("data-theme", scheme);
+        await expectAccessible(page);
+        await noHorizontalScroll(page);
+      }
+    });
+  }
+});
+
+test.describe("reader view", () => {
+  // In the sample data, the lead story's feed carries full text; most stories carry only a summary.
+  async function openReader(page: Page) {
+    await page.goto("/");
+    const link = page.locator(".lead").getByRole("link", { name: /Read here/ });
+    await expect(link).toContainText(/\d+ min/);
+    await link.click();
+    await expect(page).toHaveURL(/\/read\/[a-z0-9]+$/);
+  }
+
+  test("offers the reader view only where the feed has the post's text", async ({ page }) => {
+    await page.goto("/");
+    const links = page.getByRole("link", { name: /Read here/ });
+    expect(await links.count()).toBeGreaterThan(0);
+    expect(await links.count()).toBeLessThan(await page.locator(".story").count());
+  });
+
+  test("shows the post with nothing else around it", async ({ page }) => {
+    await openReader(page);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("FlashProve");
+    await expect(page.getByText(/\d+ min read/)).toBeVisible();
+    const body = page.locator(".reader-body");
+    await expect(body.getByRole("heading", { name: "What changes" })).toBeVisible();
+    await expect(body.getByRole("listitem")).toHaveCount(3);
+    // No site navigation, search, sidebar or footer.
+    await expect(page.getByRole("navigation")).toHaveCount(0);
+    await expect(page.getByRole("search")).toHaveCount(0);
+    await expect(page.locator(".column-side, .footer")).toHaveCount(0);
+    // A way back, and the original.
+    await expect(page.getByRole("link", { name: "Back to Tensorwire" })).toHaveAttribute("href", "/");
+    await expect(page.getByRole("link", { name: "Read it on MarkTechPost" })).toHaveAttribute("href", /marktechpost\.com/);
+    await expect(page.getByText("Images, videos and embeds are on the original post.")).toBeVisible();
+  });
+
+  test("keeps only safe text from the feed", async ({ page }) => {
+    await openReader(page);
+    const body = page.locator(".reader-body");
+    await expect(body.locator("script, style, iframe, img, figure, [onclick], [style]")).toHaveCount(0);
+    await expect(body).not.toContainText("Figure 1");
+    await expect(body).not.toContainText("appeared first on");
+    expect(await page.title()).not.toBe("hacked");
+    // Relative links point at the publisher's site and don't pass on ranking.
+    const related = body.getByRole("link", { name: "A related post" });
+    await expect(related).toHaveAttribute("href", "https://www.marktechpost.com/related-post");
+    await expect(related).toHaveAttribute("rel", "nofollow noopener noreferrer");
+  });
+
+  test("is kept out of search engines, which should find the publisher's page", async ({ page }) => {
+    await openReader(page);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /marktechpost\.com/);
+    const sitemap = await (await page.request.get("/sitemap.xml")).text();
+    expect(sitemap).not.toContain("/read/");
+  });
+
+  test("remembers text size and typeface, applied before the page paints", async ({ page }) => {
+    await openReader(page);
+    const size = () => page.locator(".reader-body").evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    const before = await size();
+    await page.getByRole("button", { name: "Larger text" }).click();
+    expect(await size()).toBeGreaterThan(before);
+    await page.getByRole("group", { name: "Typeface" }).getByTitle("Sans-serif typeface").click();
+    await expect(page.locator("html")).toHaveAttribute("data-reader-font", "sans");
+
+    // Reload with the app's scripts blocked: the head script alone restores both settings.
+    await page.route("**/_next/static/**/*.js", (route) => route.abort());
+    page.removeAllListeners("console");
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-reader-size", "l");
+    await expect(page.locator("html")).toHaveAttribute("data-reader-font", "sans");
+    expect(await size()).toBeGreaterThan(before);
+  });
+
+  test("text size stops at the smallest and largest steps", async ({ page }) => {
+    await openReader(page);
+    const smaller = page.getByRole("button", { name: "Smaller text" });
+    await smaller.click();
+    await expect(smaller).toBeDisabled();
+    const larger = page.getByRole("button", { name: "Larger text" });
+    for (let i = 0; i < 3; i++) await larger.click();
+    await expect(larger).toBeDisabled();
+  });
+
+  test("a story without its text in the feed sends you to the original", async ({ page, request }) => {
+    await page.goto("/");
+    // Story ids are derived from the article URL; take a row without a reader link.
+    const row = page.locator(".story", { hasNot: page.locator(".reader-link") }).first();
+    const url = await row.locator(".story-title a").getAttribute("href");
+    const id = await page.evaluate(async (href) => {
+      const u = new URL(href!);
+      const key = `${u.hostname.replace(/^www\./, "")}${u.pathname.replace(/\/+$/, "") || "/"}${u.search}`.toLowerCase();
+      let hash = 0x811c9dc5;
+      for (let i = 0; i < key.length; i++) {
+        hash ^= key.charCodeAt(i);
+        hash = Math.imul(hash, 0x01000193);
+      }
+      return (hash >>> 0).toString(36);
+    }, url);
+    const response = await request.get(`/read/${id}`, { maxRedirects: 0 });
+    expect(response.status()).toBe(307);
+    expect(response.headers().location).toBe(url);
+  });
+
+  test("unknown or expired stories return 404", async ({ request }) => {
+    for (const path of ["/read/zzzzzzz", "/read/not-an-id!"]) {
+      expect((await request.get(path)).status(), path).toBe(404);
+    }
+  });
+
+  for (const scheme of ["light", "dark"] as const) {
+    test(`is accessible in the ${scheme} theme and fits the screen`, async ({ page }) => {
+      await page.addInitScript((value) => localStorage.setItem("tensorwire:theme", value), scheme);
+      await openReader(page);
+      await expect(page.locator(".reader-controls[data-ready]")).toBeVisible();
+      await expectAccessible(page);
+      await noHorizontalScroll(page);
+    });
+  }
+
+  test("can be read without JavaScript", async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    await page.goto("/");
+    await page.locator(".lead").getByRole("link", { name: /Read here/ }).click();
+    await expect(page.locator(".reader-body")).toContainText("sample text");
+    await expect(page.getByRole("button", { name: "Larger text" })).toBeHidden();
+    await context.close();
   });
 });
 

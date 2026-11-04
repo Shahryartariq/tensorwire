@@ -5,6 +5,7 @@ import { SOURCE_URL } from "@/lib/site";
 import { TOPICS } from "@/lib/topics";
 
 import { Mark } from "./Mark";
+import { ThemeSwitch } from "./ThemeSwitch";
 
 /** Page shell shared by every page: skip link, masthead with search and topics, footer. */
 export function Frame({
@@ -42,6 +43,7 @@ export function Frame({
             <input id="q" name="q" type="search" placeholder="Search AI news" defaultValue={query} maxLength={80} autoComplete="off" />
             <button type="submit">Search</button>
           </form>
+          <ThemeSwitch />
         </div>
         <nav aria-label="Sections" className="sections">
           <ul>

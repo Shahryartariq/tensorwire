@@ -1,3 +1,4 @@
+import articles from "./fixtures/articles.json";
 import snapshot from "./fixtures/snapshot.json";
 import type { RawItem } from "./types";
 
@@ -14,6 +15,8 @@ export function sampleItems(slug: string): RawItem[] {
     link,
     date: Number.isNaN(Date.parse(date)) ? null : Date.parse(date),
     summary,
+    // A few stories carry sample full text, so the reader view can be developed and tested offline.
+    body: (articles.articles as Record<string, string>)[link] ?? summary,
     categories,
     comments,
   }));

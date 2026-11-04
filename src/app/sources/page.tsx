@@ -43,6 +43,7 @@ export default async function SourcesPage() {
               {SOURCES.filter((s) => s.kind === kind).map((source) => {
                 const feed = wire.feeds.find((f) => f.slug === source.slug);
                 const count = feed?.stories.length ?? 0;
+                const readable = feed?.stories.filter((story) => story.read).length ?? 0;
                 return (
                   <li key={source.slug}>
                     <h3>
@@ -54,6 +55,7 @@ export default async function SourcesPage() {
                         <span className="ok">
                           {count === 1 ? "1 story" : `${count} stories`} in the last three weeks, checked{" "}
                           {agoLong(feed.fetchedAt, wire.now)}
+                          {count > 0 && (readable > 0 ? `. ${readable} with the full post, readable here.` : ". Summaries only.")}
                         </span>
                       ) : (
                         <span className="warn">Didn&apos;t load on the last check ({feed?.error ?? "unknown error"})</span>

@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 
 import { measurementId } from "@/lib/analytics";
 import { AUTHOR, SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
+import { THEME_COLOR, themeScript } from "@/lib/theme";
 
 export function generateMetadata(): Metadata {
   const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
@@ -30,8 +31,8 @@ export function generateMetadata(): Metadata {
 export const viewport: Viewport = {
   colorScheme: "light dark",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#101735" },
-    { media: "(prefers-color-scheme: dark)", color: "#0A0F22" },
+    { media: "(prefers-color-scheme: light)", color: THEME_COLOR.light },
+    { media: "(prefers-color-scheme: dark)", color: THEME_COLOR.dark },
   ],
 };
 
@@ -41,7 +42,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const gaId = measurementId();
   return (
-    <html lang="en">
+    // The head script sets data-theme before React hydrates, so <html> may differ from the server's.
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Applies a saved light or dark theme before the first paint. Allowed by the CSP nonce. */}
+        <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>{children}</body>
       {gaId && <GoogleAnalytics gaId={gaId} nonce={nonce} />}
     </html>

@@ -19,6 +19,8 @@ export interface RawItem {
   date: number | null;
   /** Description, summary or content. May contain HTML. */
   summary: string;
+  /** The fullest text in the item (content:encoded, Atom content, or the description), as HTML. */
+  body?: string;
   categories: string[];
   /** A discussion page, when the feed has one (Hacker News). */
   comments?: string;
@@ -57,6 +59,8 @@ export interface Story {
   summary?: string;
   topics: TopicSlug[];
   discussion?: string;
+  /** Minutes to read, when the feed carries enough of the post to read here (the reader view). */
+  read?: number;
 }
 
 /** One news event: the main story and any other coverage of it. */

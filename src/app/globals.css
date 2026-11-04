@@ -30,6 +30,7 @@
   --official: #0a7559;
   --official-bg: #e2f4ee;
   --warn: #9a3412;
+  --progress: #101735;
 
   --font: "Schibsted Grotesk Variable", "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --step--1: 0.8125rem;
@@ -45,8 +46,14 @@
   color-scheme: light dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+/*
+ * Dark theme. It applies when the system is dark and the reader hasn't chosen light, or when the
+ * reader chose dark (src/components/ThemeSwitch.tsx). The two blocks must stay identical; a unit
+ * test checks. Both are screen-only, so printing always uses the light colours.
+ */
+@media screen and (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --paper: #0a0f22;
     --surface: #111834;
     --ink: #e8ecf7;
@@ -67,7 +74,39 @@
     --official: #43cfa5;
     --official-bg: rgb(67 207 165 / 0.12);
     --warn: #fdba74;
+    --progress: #ffe14d;
   }
+}
+
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --paper: #0a0f22;
+    --surface: #111834;
+    --ink: #e8ecf7;
+    --muted: #a3acc8;
+    --rule: #232c52;
+    --visited: #a59fd6;
+
+    --band: #060a19;
+    --band-rule: #1e2747;
+    --band-field: #121a38;
+
+    --highlight: rgb(255 225 77 / 0.32);
+
+    --cell-off: #2a3358;
+    --cell-on: #e8ecf7;
+    --band-cell-off: #2a3358;
+
+    --official: #43cfa5;
+    --official-bg: rgb(67 207 165 / 0.12);
+    --warn: #fdba74;
+    --progress: #ffe14d;
+  }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 *,
@@ -216,6 +255,7 @@ main:focus {
   display: flex;
   flex: 1 1 18rem;
   max-width: 26rem;
+  margin-left: auto;
 }
 
 .search input {
@@ -263,6 +303,57 @@ main:focus {
   background: transparent;
   color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+/* Light / dark / system: three icon radios in the masthead. */
+.theme-switch {
+  display: inline-flex;
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  min-inline-size: 0;
+  background: var(--band-field);
+  border: 1px solid var(--band-rule);
+  border-radius: 8px;
+  /* It needs JavaScript, so it stays invisible (but keeps its space) until the page hydrates. */
+  visibility: hidden;
+}
+
+.theme-switch[data-ready] {
+  visibility: visible;
+}
+
+.theme-switch label {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  color: var(--band-muted);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.theme-switch svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-switch label:hover {
+  color: var(--band-ink);
+}
+
+.theme-switch label:has(:checked) {
+  color: var(--mark-ink);
+  background: var(--mark);
+}
+
+.theme-switch label:has(:focus-visible) {
+  outline: 3px solid var(--mark);
+  outline-offset: 2px;
 }
 
 .sections {
@@ -1019,12 +1110,443 @@ main:focus {
   border-radius: 4px;
 }
 
+/* ---------- Reader view ---------- */
+
+.reader-link {
+  /* Inline-block, not flex: flex items would trim the spaces around the "·". */
+  display: inline-block;
+  padding: 0.05rem 0.55rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ink);
+  text-decoration: none;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+
+.reader-link:hover {
+  background: var(--highlight);
+  border-color: transparent;
+}
+
+.band .reader-link {
+  color: var(--band-ink);
+  border-color: var(--band-rule);
+}
+
+.band .reader-link:hover {
+  color: var(--mark-ink);
+  background: var(--mark);
+}
+
+.reader {
+  --reader-measure: 40rem;
+  --reader-size: 1.1875rem;
+  --reader-font: "Source Serif 4 Variable", "Source Serif 4", Georgia, "Times New Roman", serif;
+  min-height: 100vh;
+  background: var(--surface);
+}
+
+[data-reader-size="s"] .reader {
+  --reader-size: 1.0625rem;
+}
+
+[data-reader-size="l"] .reader {
+  --reader-size: 1.3125rem;
+}
+
+[data-reader-size="xl"] .reader {
+  --reader-size: 1.5rem;
+}
+
+[data-reader-font="sans"] .reader {
+  --reader-font: var(--font);
+}
+
+/* How far down the article you are: a thin bar that fills as the page scrolls. CSS only. */
+.reader-progress {
+  display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .reader-progress {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 20;
+    display: block;
+    height: 3px;
+    background: var(--progress);
+    transform-origin: 0 50%;
+    animation: reader-progress linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@keyframes reader-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.reader-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding: 1rem var(--gutter);
+}
+
+.reader-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.reader-home .mark-cell {
+  fill: var(--cell-off);
+}
+
+.reader-home .mark-lit {
+  fill: var(--progress);
+}
+
+.reader-home:hover span {
+  text-decoration: underline;
+}
+
+.reader-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  visibility: hidden;
+}
+
+.reader-controls[data-ready] {
+  visibility: visible;
+}
+
+.reader-size,
+.reader-font,
+.theme-switch.is-paper {
+  display: inline-flex;
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  min-inline-size: 0;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+}
+
+.reader-size button,
+.reader-font label,
+.theme-switch.is-paper label {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  padding: 0;
+  font: inherit;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.reader-size button:hover:not(:disabled),
+.reader-font label:hover,
+.theme-switch.is-paper label:hover {
+  color: var(--ink);
+}
+
+.reader-size button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.reader-size-small {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.reader-size-large {
+  font-size: 1.1875rem;
+  font-weight: 700;
+}
+
+.reader-font-sample {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.reader-font-sample.is-serif {
+  font-family: "Source Serif 4 Variable", Georgia, serif;
+}
+
+.reader-font label:has(:checked),
+.theme-switch.is-paper label:has(:checked) {
+  color: var(--surface);
+  background: var(--ink);
+}
+
+.reader-font label:has(:focus-visible),
+.theme-switch.is-paper label:has(:focus-visible) {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.reader-article {
+  max-width: calc(var(--reader-measure) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding: clamp(1.5rem, 1rem + 3vw, 3.5rem) var(--gutter) 4rem;
+}
+
+.reader-source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.reader-source a {
+  text-decoration: none;
+}
+
+.reader-source a:hover {
+  text-decoration: underline;
+}
+
+.reader-head h1 {
+  margin-top: 0.75rem;
+  font-size: clamp(1.875rem, 1.35rem + 2.2vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.reader-meta {
+  margin-top: 1rem;
+  padding-bottom: 1.75rem;
+  font-size: 0.9375rem;
+  color: var(--muted);
+  border-bottom: 1px solid var(--rule);
+}
+
+.reader-body {
+  margin-top: 2rem;
+  font-family: var(--reader-font);
+  font-size: var(--reader-size);
+  line-height: 1.68;
+  overflow-wrap: break-word;
+  hanging-punctuation: first;
+}
+
+[data-reader-font="sans"] .reader-body {
+  line-height: 1.6;
+}
+
+.reader-body > * + * {
+  margin-top: 1.15em;
+}
+
+.reader-body h2,
+.reader-body h3,
+.reader-body h4,
+.reader-body h5,
+.reader-body h6 {
+  margin-top: 1.9em;
+  font-family: var(--font);
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.reader-body h2 {
+  font-size: 1.35em;
+}
+
+.reader-body h3 {
+  font-size: 1.15em;
+}
+
+.reader-body h4,
+.reader-body h5,
+.reader-body h6 {
+  font-size: 1em;
+}
+
+.reader-body h2 + *,
+.reader-body h3 + *,
+.reader-body h4 + * {
+  margin-top: 0.6em;
+}
+
+.reader-body a {
+  text-decoration-color: var(--muted);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.reader-body a:hover {
+  background: var(--highlight);
+  text-decoration-color: currentColor;
+}
+
+.reader-body ul,
+.reader-body ol {
+  padding-left: 1.4em;
+}
+
+.reader-body ul {
+  list-style: disc;
+}
+
+.reader-body ol {
+  list-style: decimal;
+}
+
+.reader-body li + li {
+  margin-top: 0.4em;
+}
+
+.reader-body li::marker {
+  color: var(--muted);
+}
+
+.reader-body blockquote {
+  margin-inline: 0;
+  padding-left: 1.1em;
+  font-style: italic;
+  border-left: 3px solid var(--cell-on);
+}
+
+.reader-body blockquote > * + * {
+  margin-top: 0.8em;
+}
+
+.reader-body code,
+.reader-body kbd {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.85em;
+}
+
+.reader-body :not(pre) > code,
+.reader-body kbd {
+  padding: 0.1em 0.35em;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+
+/* Code wraps instead of scrolling sideways, so nothing on the page needs a horizontal scroll. */
+.reader-body pre {
+  padding: 1em 1.1em;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+}
+
+.reader-body hr {
+  margin-block: 2.25em;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.reader-body table {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 0.85em;
+  border-collapse: collapse;
+}
+
+.reader-body th,
+.reader-body td {
+  padding: 0.5em 0.6em;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--rule);
+}
+
+.reader-body th {
+  font-weight: 700;
+}
+
+.reader-body dt {
+  font-weight: 700;
+}
+
+.reader-body dd {
+  margin-left: 1.4em;
+}
+
+.reader-end {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.reader-note {
+  font-size: 0.9375rem;
+  color: var(--muted);
+}
+
+.reader-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.reader-actions .button {
+  padding: 0.65rem 1.1rem;
+}
+
+@media print {
+  .reader-bar,
+  .reader-progress,
+  .reader-actions {
+    display: none;
+  }
+
+  .reader {
+    background: none;
+  }
+}
+
 /* ---------- Small screens ---------- */
 
 @media (max-width: 40rem) {
+  /* Brand and theme switch share the first row; search takes the full second row. */
   .search {
     flex-basis: 100%;
     max-width: none;
+    margin-left: 0;
+    order: 1;
+  }
+
+  .theme-switch {
+    margin-left: auto;
   }
 
   .story {
