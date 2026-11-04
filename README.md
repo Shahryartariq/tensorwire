@@ -46,7 +46,7 @@ Tensorwire shows each story's headline, a short excerpt when the feed provides o
 | UI | React 19, hand-written CSS, Schibsted Grotesk self-hosted from npm |
 | Feeds | RSS 2.0, RSS 1.0 and Atom parsed with [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser); text cleaned with [entities](https://github.com/fb55/entities) |
 | Caching | `unstable_cache` per feed, 15 minutes, on the Vercel Data Cache |
-| Tests | Vitest (58 unit and API tests), Playwright (56 end-to-end runs on desktop and mobile), axe-core accessibility checks |
+| Tests | Vitest (66 unit and API tests), Playwright (76 end-to-end runs on desktop and mobile), axe-core accessibility checks |
 | CI | GitHub Actions: lint, type check, unit tests, build, end-to-end tests |
 | Hosting | Vercel |
 
