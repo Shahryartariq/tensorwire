@@ -2,7 +2,7 @@
 
 **Live: [tensorwire.vercel.app](https://tensorwire.vercel.app)**
 
-Today's AI news on one page. Tensorwire reads 18 feeds, from AI labs, newsrooms and independent builders, every 15 minutes. When several outlets report the same news, it shows up once with every source listed, and the story most outlets are covering leads the page.
+Today's AI news on one page. Tensorwire reads 59 feeds, from AI labs, newsrooms and independent builders, every 15 minutes. When several outlets report the same news, it shows up once with every source listed, and the story most outlets are covering leads the page.
 
 <p align="center">
   <img src="docs/screenshot.png" alt="Tensorwire front page: the most covered story in a navy band, then the latest AI news grouped by age, with coverage cells, sources and topics" width="72%">
@@ -33,9 +33,11 @@ Today's AI news on one page. Tensorwire reads 18 feeds, from AI labs, newsrooms 
 
 | Labs and companies | Newsrooms | Builders and newsletters |
 |---|---|---|
-| OpenAI, Google DeepMind, Google AI blog, Google Research, Hugging Face, Microsoft Research, NVIDIA, AWS Machine Learning | TechCrunch, The Verge, MIT Technology Review, Ars Technica, Wired, MarkTechPost | Simon Willison, Latent Space, Import AI, Hacker News (LLM posts with 100+ points) |
+| OpenAI, Google DeepMind, Google AI blog, Google Research, Hugging Face, Microsoft Research, NVIDIA, NVIDIA Technical Blog, AWS Machine Learning, Apple Machine Learning Research, Meta Engineering, Google Cloud AI, Amazon Science, IBM Research, Ai2, GitHub, Cloudflare, Databricks, Together AI, Replicate, Pinecone | TechCrunch, The Verge, MIT Technology Review, Ars Technica, Wired, MarkTechPost, The Register, ZDNET, IEEE Spectrum, SiliconANGLE, MIT News, InfoQ, Unite.AI, Futurism, 404 Media, Engadget, Analytics India Magazine, KDnuggets, Towards Data Science | Simon Willison, Latent Space, Import AI, Hacker News (LLM posts with 100+ points), Interconnects, One Useful Thing, Ahead of AI, Andrej Karpathy, Hamel Husain, Understanding AI, AI as Normal Technology, Gary Marcus, SemiAnalysis, Chips and Cheese, The Algorithmic Bridge, AI Supremacy, Exponential View, Don't Worry About the Vase, Ben's Bites |
 
-Tensorwire shows each story's headline, a short excerpt when the feed provides one, and a link to the original article. It never copies full articles.
+General tech feeds (Engadget, 404 Media, ZDNET) and broad company blogs keep only their AI stories. Weekly round-ups (Exponential View, Zvi, Ben's Bites, Import AI) never join a story group, because they cover many stories at once. Every feed was tested from Vercel before it was added: feeds that block Vercel, are stale or have moved (Anthropic, Mistral, VentureBeat, The Decoder and others) are left out.
+
+Tensorwire shows each story's headline, a short excerpt when the feed provides one, and a link to the original article. Its reader view shows only the text a publisher puts in its own feed; it never copies articles from publishers' websites.
 
 ## Tech stack
 
@@ -53,7 +55,7 @@ Tensorwire shows each story's headline, a short excerpt when the feed provides o
 ## How it works
 
 ```
-18 RSS/Atom feeds ──▶ fetch + parse ──▶ clean + filter ──▶ topics ──▶ group ──▶ pages, RSS, sitemap
+59 RSS/Atom feeds ──▶ fetch + parse ──▶ clean + filter ──▶ topics ──▶ group ──▶ pages, RSS, sitemap
                       (each cached       (plain text,       (keyword   (same news
                        15 minutes)        safe URLs,         rules)     → one story)
                                           per-source rules)
@@ -155,7 +157,7 @@ src/
   components/                 Frame, lead story, story list, coverage cells, side panels,
                               theme switch, reader settings
   lib/
-    sources.ts                The 18 feeds and their filters
+    sources.ts                The 59 feeds and their filters
     feeds.ts                  Fetching and caching (server only)
     parse.ts                  RSS and Atom parsing
     reader.ts                 Reader view: cleaning feed HTML, reading time

@@ -234,7 +234,7 @@ describe("sources", () => {
   it("has unique slugs, https feeds and a description for each", () => {
     expect(new Set(SOURCES.map((s) => s.slug)).size).toBe(SOURCES.length);
     for (const source of SOURCES) {
-      expect(source.slug).toMatch(/^[a-z]+(-[a-z]+)*$/);
+      expect(source.slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
       expect(source.feed.startsWith("https://")).toBe(true);
       expect(source.about.length).toBeGreaterThan(30);
     }

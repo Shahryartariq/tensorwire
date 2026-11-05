@@ -9,7 +9,7 @@ import { agoLong } from "@/lib/time";
 import type { SourceKind } from "@/lib/types";
 
 const description =
-  "The 18 AI news sources Tensorwire reads every 15 minutes: lab blogs, newsrooms and independent builders, with the latest status of each feed.";
+  `The ${SOURCES.length} AI news sources Tensorwire reads every 15 minutes: lab blogs, newsrooms and independent builders, with the latest status of each feed.`;
 
 export const metadata: Metadata = {
   title: "Sources",
