@@ -1,6 +1,6 @@
 {
   "capturedAt": "2026-11-04T06:00:00Z",
-  "note": "A snapshot of each source's feed, used when NEWS_SAMPLE_DATA=1 (local development and end-to-end tests). Each item is [title, link, date, summary, categories].",
+  "note": "A snapshot of each source's feed, used when NEWS_SAMPLE_DATA=1 (local development and end-to-end tests). Each item is [title, link, date, summary, categories]. Sources added on 2026-11-05 have one real headline each from their feeds; for Unite.AI and Engadget, whose feeds only held newer items, the date was moved inside the snapshot window.",
   "sources": {
     "openai": [
       ["Accelerating engineering for the physical world", "https://openai.com/index/accelerating-engineering-for-the-physical-world", "Tue, 03 Nov 2026 12:00:00 GMT", "Discover how ChatGPT and Codex are helping engineers accelerate CAD, PCB design, simulation, and other workflows across the physical world.", ["Research"]],
@@ -128,6 +128,129 @@
       ["OpenAI and Anthropic cut their LLM prices by up to 80% within a few months. Why?", "https://minimaxir.com/2026/10/cheap-llms/", "Sun, 25 Oct 2026 21:11:31 +0000", "Article URL: https://minimaxir.com/2026/10/cheap-llms/", [], "https://news.ycombinator.com/item?id=50236102"],
       ["Using LLM for confidence scoring is a bad idea", "https://rumple.github.io/blog/2026/10/20/asking-llm-for-confidence.html", "Wed, 21 Oct 2026 04:27:51 +0000", "Article URL: https://rumple.github.io/blog/2026/10/20/asking-llm-for-confidence.html", [], "https://news.ycombinator.com/item?id=50176082"],
       ["Harness Engineering 101: The LLM is the brain, the harness is the body", "https://github.com/IsuruMaduranga/harness-engineering-101", "Mon, 19 Oct 2026 12:07:41 +0000", "Article URL: https://github.com/IsuruMaduranga/harness-engineering-101", [], "https://news.ycombinator.com/item?id=50151390"]
+    ],
+    "apple-ml": [
+      ["GHARP: Real-Time Gaussian Head Animation from Large-Scale Reconstruction Prior", "https://machinelearning.apple.com/research/gharp-head-animation", "2026-10-26T00:00:00.000Z", "We present GHARP (Real-time Gaussian Head Animation from Large-scale Reconstruction Prior), a method that animates 3D human heads in real time from a…", []]
+    ],
+    "meta-engineering": [
+      ["Catching Bugs Before They Land: JiTTesting’s Human-on-the-Loop Approach at Full Scale", "https://engineering.fb.com/2026/10/29/security/catching-bugs-before-they-land-jittestings-human-on-the-loop-approach-at-full-scale/", "2026-10-29T16:00:12.000Z", "Over the last year we’ve been sharing our work leveraging large language models to catch bugs on the fly — a novel approach we call Catching…", []]
+    ],
+    "google-cloud-ai": [
+      ["What’s new in AI infrastructure and orchestration in October", "https://cloud.google.com/blog/topics/ai-infrastructure/whats-new-in-ai-infrastructure-this-month/", "2026-10-30T16:00:00.000Z", "The Google Cloud AI Infrastructure team had another busy month in October, filled with new product launches and updates to power today’s AI and…", []]
+    ],
+    "nvidia-developer": [
+      ["Build a Validated Kubernetes Runtime for NVIDIA Dynamo", "https://developer.nvidia.com/blog/build-a-validated-kubernetes-runtime-for-nvidia-dynamo/", "2026-10-30T21:35:31.000Z", "Teams building AI applications need a repeatable path from a model configuration to a working inference endpoint. NVIDIA Dynamo is a distributed…", []]
+    ],
+    "amazon-science": [
+      ["Speeding up language models for travel applications", "https://www.amazon.science/blog/speeding-up-language-models-for-travel-applications", "2026-10-29T16:51:26.000Z", "Two optimization techniques, when combined, can significantly improve a model’s speed and cost effectiveness without sacrificing quality.", []]
+    ],
+    "ibm-research": [
+      ["IBM and Kaggle launch Java framework migration leaderboard", "https://research.ibm.com/blog/ibm-and-kaggle-launch-leaderboard-for-java-framework-migration", "2026-10-27T12:00:00.000Z", "ScarfBench evaluates model-and-agent-harness combinations for enterprise Java migration, pairing migration validation with reproduced runs and a…", []]
+    ],
+    "ai2": [
+      ["How researchers are adapting olmOCR 2 for historical and archaeological archives", "https://allenai.org/blog/olmocr-2-historical-archives", "2026-10-28T08:00:00.000Z", "Researchers are adapting olmOCR 2 to make historical photo libraries searchable locally and improve transcription of handwritten archaeological…", []]
+    ],
+    "github-ai": [
+      ["How 3 Java Champions are using GitHub Copilot for increased productivity", "https://github.blog/ai-and-ml/github-copilot/how-3-java-champions-are-using-github-copilot-for-increased-productivity/", "2026-10-20T16:05:03.000Z", "Three Java Champions share how they use GitHub Copilot to solve problems, accelerate development, and keep humans responsible for the results.", []]
+    ],
+    "cloudflare-ai": [
+      ["How Commerce.com and Cloudflare are getting storefronts ready for AI agents", "https://blog.cloudflare.com/webmcp-commerce/", "2026-10-21T13:00:00.000Z", "Almost 100,000 Commerce.com domains now give AI agents real shopping tools through WebMCP on Cloudflare. Here's how we turned it on across every…", []]
+    ],
+    "databricks": [
+      ["Databricks and SAP unleash end-to-end data & AI capabilities to level up enterprise AI transformation", "https://www.databricks.com/blog/databricks-and-sap-unleash-end-end-data-ai-capabilities-level-enterprise-ai-transformation", "2026-10-30T21:00:00.000Z", "Today's AI models are more capable than ever. What they still lack is the business context.", []]
+    ],
+    "together-ai": [
+      ["Auto repair for Together GPU Clusters: from GPU fault to healthy node", "https://www.together.ai/blog/auto-repair-for-together-gpu-clusters", "2026-10-27T00:00:00.000Z", "Together GPU Clusters auto repair detects GPU, host and fabric faults, picks the lightest fix, and lets you decide per fault and per Xid code which…", []]
+    ],
+    "replicate": [
+      ["The Ultimate Guide to Kling 4.0", "https://replicate.com/blog/kling-4", "2026-10-27T00:00:00.000Z", "Kling 4.0 makes up to 30 seconds of 1080p video from a prompt, and it can thread one continuous shot through up to 10 keyframes.", []]
+    ],
+    "pinecone": [
+      ["Introducing pg_pinecone: Open-Source Search for Your Postgres Data", "https://www.pinecone.io/blog/introducing-pg-pinecone/", "2026-10-27T13:00:00.000Z", "pg_pinecone is an open source (Apache 2.0) Postgres extension for search on the data you already store, built on the search engine Pinecone runs at…", []]
+    ],
+    "the-register": [
+      ["India floats AI plan under which ‘The model travels to the data, rather than the data travelling to the model’", "https://www.theregister.com/public-sector/2026/11/02/india-floats-ai-plan-under-which-the-model-travels-to-the-data-rather-than-the-data-travelling-to-the-model/5306872", "2026-11-02T04:39:50.000Z", "Wants more local AI, without Big Tech getting open access to everything", []]
+    ],
+    "zdnet": [
+      ["50 AI agents tried to build a thriving Minecraft civilization – it didn’t end well", "https://www.zdnet.com/innovation/y-combinator-ai-agents-minecraft-experiment-behavior/", "2026-11-02T16:30:00.000Z", "It turns out even bots can’t escape bureaucracy, as a Y Combinator experiment with 50 AI agents showed.", []]
+    ],
+    "ieee-spectrum": [
+      ["Guarding the Gates of Knowledge", "https://spectrum.ieee.org/ai-slop-trust-science", "2026-11-01T14:00:01.000Z", "A recent scroll through social media got me thinking about trust. About half my feed was filled with AI slop that astute users would call out as…", []]
+    ],
+    "siliconangle": [
+      ["Can enterprise AI pay for the boom?", "https://siliconangle.com/2026/10/31/can-enterprise-ai-pay-for-the-boom/", "2026-10-31T17:12:02.000Z", "The artificial intelligence buildout is making an enormous bet on what businesses will eventually be willing to pay for intelligence.", []]
+    ],
+    "mit-news": [
+      ["Regina Barzilay and Jim Collins win Pritzker Prize for AI and Science Research Excellence for work in AI-enabled antibiotic discovery", "https://news.mit.edu/2026/regina-barzilay-jim-collins-win-pritzker-prize-ai-and-science-research-excellence-1102", "2026-11-02T05:35:00.000Z", "The MIT professors collaborated to identify the first AI-discovered antibiotic, a scientific breakthrough that is widely recognized as a milestone in…", []]
+    ],
+    "infoq": [
+      ["Google Discloses PageBreak AI Security Agent That Found 500+ XSS Bugs", "https://www.infoq.com/news/2026/10/google-pagebreak-security-agent/", "2026-10-31T06:20:00.000Z", "According to a paper published by Google, its AI-powered security agent has uncovered more than 500 XSS vulnerabilities across its web applications…", []]
+    ],
+    "unite-ai": [
+      ["Cohere Brings Embed 5 and Rerank 5 to OpenRouter’s Unified API", "https://www.unite.ai/cohere-brings-embed-5-and-rerank-5-to-openrouters-unified-api/", "2026-11-02T06:00:00.000Z", "Cohere's Embed 5 and Rerank 5 retrieval models are available on OpenRouter. Existing users can call them with the same unified API.", []]
+    ],
+    "futurism": [
+      ["Prisons Teaming Up With AI Software Company to Predict When Incarcerated People Will Commit Future Crimes", "https://futurism.com/artificial-intelligence/prisons-ai-prediction-incarceration-algorithm", "2026-11-01T18:10:00.000Z", "It's going to \"optimize placement of incarcerated individuals.\"", []]
+    ],
+    "404-media": [
+      ["Proton’s CEO Cancels AI ‘Re-Interviews’", "https://www.404media.co/protons-ceo-cancels-ai-re-interviews/", "2026-10-30T16:40:39.000Z", "The move came after 404 Media published an investigation into how Proton CEO Andy Yen was aggressively pushing AI across Proton despite security…", []]
+    ],
+    "engadget": [
+      ["Valve just changed its Steam release rules amid a flood of AI games", "https://www.engadget.com/2306215/valve-changed-its-steam-release-rules-amid-a-flood-of-ai-games/", "2026-11-02T06:00:00.000Z", "Valve is updating its game release rules to try to unclog a backlog of approvals due to a recent flood of new game titles, many created with AI.", []]
+    ],
+    "analytics-india": [
+      ["Canva to Lay Off 1,271 Employees, 22% of Workforce to Be Affected", "https://analyticsindiamag.com/ai-news/canva-to-lay-off-1271-employees-22-of-workforce-to-be-affected", "2026-11-04T04:05:38.000Z", "The company will offer affected employees at least six months’ salary and consolidate more product teams in Sydney as part of an organisational…", []]
+    ],
+    "kdnuggets": [
+      ["Vibe Coding a Classic Game: Building Breakout Step by Step with an AI Assistant", "https://www.kdnuggets.com/vibe-coding-a-classic-game-building-breakout-step-by-step-with-an-ai-assistant", "2026-10-30T14:00:00.000Z", "Vibe coding is a workflow where you describe what you want in natural language and let an AI agent handle code generation, execution, and iteration…", []]
+    ],
+    "towards-data-science": [
+      ["The Enterprise Context Layer: A Practitioner's Guide to 6 Advanced Architectural Patterns", "https://towardsdatascience.com/the-enterprise-context-layer-a-practitioners-guide-to-6-advanced-architectural-patterns/", "2026-11-01T16:00:00.000Z", "Beyond RAG: How modern architectures engineer precise, cost-efficient context for enterprise AI agents.", []]
+    ],
+    "interconnects": [
+      ["Was I wrong about open models & cyber risks?", "https://www.interconnects.ai/p/was-i-wrong-about-open-models-and", "2026-10-30T17:36:56.000Z", "Last week coined the term “Black October“ after an onslaught of critical vulnerability disclosures, including PHP2Shell and a long-standing GitLab…", []]
+    ],
+    "one-useful-thing": [
+      ["30 Months on the Exponential (in Charts)", "https://www.oneusefulthing.org/p/30-months-on-the-exponential-in-charts", "2026-10-20T15:57:59.000Z", "My new book is out today... what happened since the last one", []]
+    ],
+    "ahead-of-ai": [
+      ["Building Reasoning Models from the Ground Up: A Full Video Course", "https://magazine.sebastianraschka.com/p/building-reasoning-models", "2026-10-24T11:14:32.000Z", "Over 11 hours of coding videos on evaluation, inference-time scaling, reinforcement learning, and distillation, with Python and PyTorch.", []]
+    ],
+    "karpathy": [
+      ["HackerTube", "https://karpathy.bearblog.dev/hacker-tube/", "2026-10-31T17:00:00.000Z", "", []]
+    ],
+    "hamel": [
+      ["How To Use Decision Models for Evals", "https://hamel.dev/blog/posts/decision-model-evals/", "2026-10-20T07:00:00.000Z", "Decision models have exploded onto the scene recently, and they change how you can evaluate LLM applications.", []]
+    ],
+    "understanding-ai": [
+      ["Anthropic’s financials are surprisingly strong", "https://www.understandingai.org/p/anthropics-financials-are-surprisingly", "2026-10-29T19:10:41.000Z", "What I learned reading all 421 pages of the Anthropic S-1", []]
+    ],
+    "normal-tech": [
+      ["New paper: Emerging trends in AI agent evaluation", "https://www.normaltech.ai/p/new-paper-emerging-trends-in-ai-agent", "2026-10-19T20:11:55.000Z", "Understanding the methods, questions, and ecosystem for evaluation", []]
+    ],
+    "gary-marcus": [
+      ["What Anthropic left out of their draft S-1", "https://garymarcus.substack.com/p/what-anthropic-left-out-of-their", "2026-10-26T17:57:52.000Z", "", []]
+    ],
+    "semianalysis": [
+      ["GDPx: Measuring Frontier Model Capabilities Across the Most Valuable Domains", "https://newsletter.semianalysis.com/p/gdpx-measuring-frontier-model-capabilities", "2026-11-02T01:51:42.000Z", "A frontier benchmark spanning RSI, hardware design, cyber, bio, finance, legal, quant trading, chip design, software engineering and materials science.", []]
+    ],
+    "chips-and-cheese": [
+      ["“Performance” Oryon: Qualcomm’s Little Core", "https://chipsandcheese.com/p/performance-oryon-qualcomms-little", "2026-10-24T23:13:33.000Z", "Qualcomm’s Snapdragon X2 Elite uses a hybrid core setup, breaking away from the all-big-core strategy that the company previously used with in-house…", []]
+    ],
+    "algorithmic-bridge": [
+      ["New Study: Anthropic Just Gave You a Reason to Stop Working With AI", "https://www.thealgorithmicbridge.com/p/new-study-anthropic-just-gave-you", "2026-10-29T13:20:35.000Z", "The machine is secretly making up your mind", []]
+    ],
+    "ai-supremacy": [
+      ["Google has Succeeded in Disrupting Itself", "https://www.ai-supremacy.com/p/google-has-succeeded-in-disrupting-itself-as-search-declines", "2026-10-29T09:31:04.000Z", "Google’s negative FCF and Search decline is concerning. Google bets on TPUs being an Nvidia competitor.", []]
+    ],
+    "exponential-view": [
+      ["🔮 39 charts on Anthropic, one-person biotech firm & cheap solar #608", "https://www.exponentialview.co/p/ev-608", "2026-11-01T03:54:37.000Z", "", []]
+    ],
+    "zvi": [
+      ["AI #190: Scion of the Times", "https://thezvi.substack.com/p/ai-190-scion-of-the-times", "2026-10-15T12:03:51.000Z", "The amount of code being written at Anthropic continues to rise exponentially.", []]
+    ],
+    "bens-bites": [
+      ["AI is overwhelming and I’m doing it wrong", "https://www.bensbites.com/p/ai-is-overwhelming-and-im-doing-it", "2026-10-29T14:03:54.000Z", "", []]
     ]
   }
 }

@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
+import { SOURCES } from "../src/lib/sources";
+
 const problems: string[] = [];
 
 test.beforeEach(async ({ page }) => {
@@ -131,8 +133,9 @@ test.describe("sections", () => {
 
   test("the sources page lists every feed with its status", async ({ page }) => {
     await page.goto("/sources");
-    await expect(page.locator(".source-list li")).toHaveCount(18);
-    await expect(page.locator(".source-status .ok")).toHaveCount(18);
+    await expect(page.locator(".source-list li")).toHaveCount(SOURCES.length);
+    // Every feed in the snapshot loads.
+    await expect(page.locator(".source-status .ok")).toHaveCount(SOURCES.length);
     // Which feeds carry full posts for the reader view.
     await expect(page.locator(".source-status", { hasText: "with the full post, readable here" }).first()).toBeVisible();
     await expect(page.locator(".source-status", { hasText: "Summaries only" }).first()).toBeVisible();
@@ -208,7 +211,7 @@ test.describe("search engines", () => {
 
   test("sitemap, robots and feed are served", async ({ request }) => {
     const sitemap = await (await request.get("/sitemap.xml")).text();
-    expect(sitemap.match(/<url>/g)).toHaveLength(1 + 1 + 8 + 18 + 2);
+    expect(sitemap.match(/<url>/g)).toHaveLength(1 + 1 + 8 + SOURCES.length + 2);
     expect(sitemap).not.toContain("/search");
     const robots = await (await request.get("/robots.txt")).text();
     expect(robots).toContain("Sitemap: http://localhost:3000/sitemap.xml");

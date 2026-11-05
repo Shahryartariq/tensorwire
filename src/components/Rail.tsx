@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SOURCES } from "@/lib/sources";
 
 import { mostCovered } from "@/lib/cluster";
 import { inTopic } from "@/lib/load";
@@ -58,7 +59,7 @@ export function AboutPanel() {
         How this works
       </h2>
       <p>
-        Tensorwire reads 18 AI news feeds every 15 minutes. When several outlets report the same news, you see it once,
+        Tensorwire reads {SOURCES.length} AI news feeds every 15 minutes. When several outlets report the same news, you see it once,
         with every source listed. Lab and company posts are marked <span className="official">Official</span>.
       </p>
       <p>
