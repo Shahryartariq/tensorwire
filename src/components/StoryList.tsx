@@ -19,8 +19,6 @@ export function StoryRow({ cluster, now }: { cluster: Cluster; now: number }) {
   const { lead } = cluster;
   const source = sourceBySlug(lead.source);
   const others = cluster.stories.slice(1);
-  // The reader view needs a feed that carries the post's text; the lead's, or another report's.
-  const readable = cluster.stories.find((story) => story.read);
   // The time column shows the latest report, which is also how the wire is ordered.
   const iso = new Date(cluster.latest).toISOString();
   return (
@@ -34,13 +32,13 @@ export function StoryRow({ cluster, now }: { cluster: Cluster; now: number }) {
           <a href={lead.url}>{lead.title}</a>
         </h3>
         {lead.summary && <p className="story-summary">{lead.summary}</p>}
+        <StoryActions cluster={cluster} />
         <div className="story-meta">
           <Coverage count={cluster.sources.length} />
           <a href={`/source/${lead.source}`} className="story-source">
             {sourceName(lead.source)}
           </a>
           {source?.kind === "lab" && <span className="official">Official</span>}
-          {readable && <ReaderLink story={readable} showSource={readable !== lead} />}
           {others.length > 0 && (
             <span className="also">
               Also in{" "}
@@ -73,16 +71,57 @@ export function StoryRow({ cluster, now }: { cluster: Cluster; now: number }) {
   );
 }
 
+/**
+ * The two ways to read a story, as buttons under its summary: here in the reader view (only when a
+ * feed carries the post's text, the lead's or another report's) and on the publisher's site.
+ */
+export function StoryActions({ cluster }: { cluster: Cluster }) {
+  const { lead } = cluster;
+  const readable = cluster.stories.find((story) => story.read);
+  return (
+    <div className="story-actions">
+      {readable && <ReaderLink story={readable} showSource={readable !== lead} />}
+      <a href={lead.url} className="original-link">
+        Read on {sourceName(lead.source)}
+        <span aria-hidden="true"> ↗</span>
+      </a>
+    </div>
+  );
+}
+
 /** "Read here · 4 min": opens the reader view with the text from the feed. */
 export function ReaderLink({ story, showSource = false }: { story: Story; showSource?: boolean }) {
   return (
     <a href={`/read/${story.id}`} className="reader-link">
+      <BookIcon />
       Read here
       {showSource && <> from {sourceName(story.source)}</>}
       <span aria-hidden="true"> · </span>
       <span className="visually-hidden">, </span>
       {story.read} min
     </a>
+  );
+}
+
+/** An open book, drawn in the text colour. */
+function BookIcon() {
+  return (
+    <svg
+      className="reader-link-icon"
+      viewBox="0 0 24 24"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M2 5.5C4.5 4 8.5 4 12 6c3.5-2 7.5-2 10-.5V19c-2.5-1.5-6.5-1.5-10 .5-3.5-2-7.5-2-10-.5Z" />
+      <path d="M12 6v13.5" />
+    </svg>
   );
 }
 

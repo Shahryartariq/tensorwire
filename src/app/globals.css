@@ -254,6 +254,8 @@ main:focus {
 .search {
   display: flex;
   flex: 1 1 18rem;
+  /* Without it the form never shrinks below the text box's built-in width plus the button. */
+  min-width: 0;
   max-width: 26rem;
   margin-left: auto;
 }
@@ -659,6 +661,8 @@ main:focus {
 
 .columns {
   display: grid;
+  /* minmax(0, …): without it the single column grows to fit its widest content on phones. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 3rem;
   padding-block: 2rem 4rem;
 }
@@ -1112,31 +1116,75 @@ main:focus {
 
 /* ---------- Reader view ---------- */
 
-.reader-link {
+/* The two ways to read a story: here, without distractions, or on the publisher's site. */
+.story-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+}
+
+.lead .story-actions {
+  margin: 0.25rem 0 0.35rem;
+}
+
+.reader-link,
+.original-link {
   /* Inline-block, not flex: flex items would trim the spaces around the "·". */
   display: inline-block;
-  padding: 0.05rem 0.55rem;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.5;
-  color: var(--ink);
   text-decoration: none;
-  border: 1px solid var(--rule);
+  border: 1px solid transparent;
   border-radius: 999px;
 }
 
-.reader-link:hover {
-  background: var(--highlight);
-  border-color: transparent;
-}
-
-.band .reader-link {
-  color: var(--band-ink);
-  border-color: var(--band-rule);
-}
-
-.band .reader-link:hover {
+.reader-link {
   color: var(--mark-ink);
   background: var(--mark);
+}
+
+.reader-link-icon {
+  margin-inline-end: 0.4rem;
+  vertical-align: -0.2em;
+}
+
+.original-link {
+  color: var(--ink);
+  /* Stronger than --rule so the outline reads as a button on the paper colour. */
+  border-color: color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.reader-link:hover,
+.original-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.reader-link:hover {
+  filter: brightness(1.08);
+}
+
+.original-link:hover {
+  border-color: var(--ink);
+}
+
+.band .original-link {
+  color: var(--band-ink);
+  border-color: color-mix(in srgb, var(--band-ink) 35%, transparent);
+}
+
+.band .original-link:hover {
+  border-color: var(--band-ink);
+}
+
+/* On paper, the publisher's site is enough; the buttons are for the screen. */
+@media print {
+  .story-actions {
+    display: none;
+  }
 }
 
 .reader {
