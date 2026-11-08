@@ -90,6 +90,19 @@ test.describe("front page", () => {
     await noHorizontalScroll(page);
   });
 
+  // Phone emulation widens the layout viewport to fit wide content, which hides overflow from the
+  // check above; a plain 360px window doesn't.
+  test("lays out at 360px wide without growing past the window", async ({ browser, baseURL, isMobile }) => {
+    test.skip(isMobile, "Runs once, in its own 360px window");
+    const context = await browser.newContext({ baseURL, viewport: { width: 360, height: 800 } });
+    const page = await context.newPage();
+    for (const path of ["/", "/labs", "/topic/models", "/source/openai", "/sources", "/about"]) {
+      await page.goto(path);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth), path).toBeLessThanOrEqual(360);
+    }
+    await context.close();
+  });
+
   test("skip link moves focus to the news", async ({ page, isMobile }) => {
     test.skip(isMobile, "Keyboard navigation is a desktop check");
     await page.goto("/");
@@ -358,6 +371,28 @@ test.describe("reader view", () => {
     const links = page.getByRole("link", { name: /Read here/ });
     expect(await links.count()).toBeGreaterThan(0);
     expect(await links.count()).toBeLessThan(await page.locator(".story").count());
+  });
+
+  test("every story has a button for its original site, and readable ones a reader button too", async ({ page }) => {
+    await page.goto("/");
+    const rows = page.locator(".story");
+    const count = await rows.count();
+    for (let i = 0; i < count; i++) {
+      const row = rows.nth(i);
+      const original = row.getByRole("link", { name: /^Read on / });
+      await expect(original).toHaveCount(1);
+      await expect(original).toHaveAttribute("href", (await row.locator(".story-title a").getAttribute("href"))!);
+    }
+    // Both buttons sit together under the summary, the reader one first.
+    const both = page.locator(".story-actions", { has: page.locator(".reader-link") }).first();
+    await expect(both.getByRole("link")).toHaveText([/^Read here.*\d+ min$/, /^Read on .+ ↗$/]);
+    // The lead gets the same pair; "Read on" goes where the headline goes.
+    const lead = page.locator(".lead");
+    await expect(lead.locator(".story-actions .reader-link")).toHaveAttribute("href", /^\/read\//);
+    await expect(lead.getByRole("link", { name: /^Read on / })).toHaveAttribute(
+      "href",
+      (await lead.locator(".lead-title a").getAttribute("href"))!,
+    );
   });
 
   test("shows the post with nothing else around it", async ({ page }) => {
