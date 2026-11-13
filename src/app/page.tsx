@@ -54,7 +54,7 @@ export default async function HomePage() {
       <div className="band">
         <div className="band-inner">
           <div className="band-heading">
-            <h1>Today in AI</h1>
+            <h1>Today&apos;s AI news</h1>
             <Status wire={wire} />
             <NewSince newest={wire.clusters[0]?.latest ?? 0} />
           </div>
@@ -70,7 +70,7 @@ export default async function HomePage() {
           )}
         </div>
         <aside className="column-side" aria-label="More ways in">
-          <MostCovered clusters={wire.clusters} now={wire.now} />
+          <MostCovered clusters={wire.clusters.filter((c) => c.id !== lead?.id)} now={wire.now} />
           <TopicIndex clusters={wire.clusters} />
           <AboutPanel />
         </aside>

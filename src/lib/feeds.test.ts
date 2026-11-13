@@ -68,7 +68,9 @@ describe("sample data", () => {
     const { sample, feeds } = await readAllFeeds();
     expect(sample).toBe(true);
     expect(feeds).toHaveLength(SOURCES.length);
-    expect(feeds.every((f) => f.ok && f.stories.length > 0)).toBe(true);
+    expect(feeds.every((f) => f.ok)).toBe(true);
+    // A source can be empty when everything it published was a tutorial or a listicle.
+    expect(feeds.filter((f) => f.stories.length > 0).length).toBeGreaterThanOrEqual(SOURCES.length - 2);
     expect(fetch).not.toHaveBeenCalled();
   });
 });

@@ -32,7 +32,7 @@
   --warn: #9a3412;
   --progress: #101735;
 
-  --font: "Schibsted Grotesk Variable", "Schibsted Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --step--1: 0.8125rem;
   --step-0: 1rem;
   --step-1: 1.125rem;
@@ -413,7 +413,7 @@ main:focus {
 }
 
 .band-inner {
-  padding-block: 1.75rem 2.75rem;
+  padding-block: 2rem 3.5rem;
 }
 
 .band-short .band-inner {
@@ -431,8 +431,8 @@ main:focus {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.25rem 1rem;
-  padding-bottom: 0.9rem;
-  margin-bottom: 1.75rem;
+  padding-bottom: 1rem;
+  margin-bottom: 2.25rem;
   border-bottom: 1px solid var(--band-rule);
 }
 
@@ -492,23 +492,20 @@ main:focus {
 .lead {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 0.9rem 3rem;
+  gap: 2.25rem 4rem;
+  align-items: start;
 }
 
 @media (min-width: 60rem) {
-  .lead:has(.lead-coverage) {
-    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+  .lead.has-coverage {
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
   }
+}
 
-  .lead:has(.lead-coverage) > :not(.lead-coverage) {
-    grid-column: 1;
-  }
-
-  .lead-coverage {
-    grid-column: 2;
-    grid-row: 1 / span 4;
-    align-self: end;
-  }
+.lead-main {
+  display: grid;
+  gap: 1rem;
+  justify-items: start;
 }
 
 .lead-why {
@@ -547,6 +544,7 @@ main:focus {
 .lead-summary {
   max-width: 40rem;
   font-size: var(--step-1);
+  line-height: 1.6;
   color: var(--band-muted);
 }
 
@@ -566,8 +564,14 @@ main:focus {
 
 .lead-coverage {
   display: grid;
-  gap: 0.25rem;
-  margin-top: 0.5rem;
+  gap: 0.5rem;
+}
+
+.lead-coverage-more {
+  padding-left: 1.2rem;
+  font-size: var(--step--1);
+  line-height: 1.5;
+  color: var(--band-muted);
 }
 
 .lead-coverage-label {
@@ -579,13 +583,13 @@ main:focus {
 
 .lead-coverage-list {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .lead-coverage a {
   display: grid;
   gap: 0.15rem;
-  padding: 0.7rem 0 0.7rem 1rem;
+  padding: 0.55rem 0 0.55rem 1rem;
   border-left: 3px solid var(--mark);
   text-decoration: none;
 }
@@ -663,14 +667,14 @@ main:focus {
   display: grid;
   /* minmax(0, …): without it the single column grows to fit its widest content on phones. */
   grid-template-columns: minmax(0, 1fr);
-  gap: 3rem;
-  padding-block: 2rem 4rem;
+  gap: 3.5rem;
+  padding-block: 2.75rem 5rem;
 }
 
 @media (min-width: 60rem) {
   .columns {
     grid-template-columns: minmax(0, 1fr) 19rem;
-    gap: 4rem;
+    gap: 5rem;
   }
 
   .column-side {
@@ -687,14 +691,14 @@ main:focus {
 /* ---------- The wire ---------- */
 
 .wire-group + .wire-group {
-  margin-top: 2rem;
+  margin-top: 3rem;
 }
 
 .wire-heading {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
   font-size: 0.875rem;
   font-weight: 700;
   color: var(--muted);
@@ -710,13 +714,13 @@ main:focus {
 .story {
   display: grid;
   grid-template-columns: 2.75rem minmax(0, 1fr);
-  gap: 0 0.75rem;
-  padding-block: 0.95rem;
+  gap: 0 1rem;
+  padding-block: 1.5rem;
   border-bottom: 1px solid var(--rule);
 }
 
 .story-age {
-  padding-top: 0.15rem;
+  padding-top: 0.2rem;
   font-size: 0.875rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -745,7 +749,7 @@ main:focus {
   font-size: var(--step-1);
   font-weight: 650;
   letter-spacing: -0.01em;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .story-title a,
@@ -768,9 +772,11 @@ main:focus {
 
 .story-summary {
   display: -webkit-box;
-  margin-top: 0.3rem;
+  max-width: 44rem;
+  margin-top: 0.6rem;
   overflow: hidden;
   font-size: 0.9375rem;
+  line-height: 1.6;
   color: var(--muted);
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -782,7 +788,7 @@ main:focus {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem 0.9rem;
-  margin-top: 0.5rem;
+  margin-top: 0.45rem;
   font-size: var(--step--1);
   color: var(--muted);
 }
@@ -850,7 +856,7 @@ main:focus {
 /* ---------- Side column ---------- */
 
 .panel + .panel {
-  margin-top: 2.5rem;
+  margin-top: 3.25rem;
 }
 
 .panel {
@@ -859,13 +865,14 @@ main:focus {
 }
 
 .panel-title {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
   font-size: 0.9375rem;
   font-weight: 800;
 }
 
 .panel-quiet p {
   font-size: 0.9375rem;
+  line-height: 1.6;
   color: var(--muted);
 }
 
@@ -884,8 +891,8 @@ main:focus {
 .ranked li {
   display: grid;
   grid-template-columns: 1.5rem minmax(0, 1fr);
-  gap: 0.15rem 0.25rem;
-  padding-block: 0.6rem;
+  gap: 0.3rem 0.25rem;
+  padding-block: 0.85rem;
   counter-increment: rank;
   border-bottom: 1px solid var(--rule);
 }
@@ -1120,12 +1127,12 @@ main:focus {
 .story-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.65rem;
+  gap: 0.6rem;
+  margin-top: 1rem;
 }
 
 .lead .story-actions {
-  margin: 0.25rem 0 0.35rem;
+  margin-top: 0.5rem;
 }
 
 .reader-link,
@@ -1190,7 +1197,7 @@ main:focus {
 .reader {
   --reader-measure: 40rem;
   --reader-size: 1.1875rem;
-  --reader-font: "Source Serif 4 Variable", "Source Serif 4", Georgia, "Times New Roman", serif;
+  --reader-font: var(--font-serif), Georgia, "Times New Roman", serif;
   min-height: 100vh;
   background: var(--surface);
 }
@@ -1341,7 +1348,7 @@ main:focus {
 }
 
 .reader-font-sample.is-serif {
-  font-family: "Source Serif 4 Variable", Georgia, serif;
+  font-family: var(--font-serif), Georgia, serif;
 }
 
 .reader-font label:has(:checked),
@@ -1600,6 +1607,7 @@ main:focus {
   .story {
     grid-template-columns: 2.25rem minmax(0, 1fr);
     gap: 0 0.6rem;
+    padding-block: 1.25rem;
   }
 
   .band-heading .new-since {

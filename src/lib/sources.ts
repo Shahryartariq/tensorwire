@@ -323,14 +323,6 @@ export const SOURCES: Source[] = [
     about: "AI news and analysis, with a focus on India's tech industry.",
   },
   {
-    slug: "kdnuggets",
-    name: "KDnuggets",
-    homepage: "https://www.kdnuggets.com/",
-    feed: "https://www.kdnuggets.com/feed",
-    kind: "press",
-    about: "Long-running data science site: tutorials, tool round-ups and AI explainers.",
-  },
-  {
     slug: "towards-data-science",
     name: "Towards Data Science",
     homepage: "https://towardsdatascience.com/",

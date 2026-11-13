@@ -1,5 +1,3 @@
-import "@fontsource-variable/source-serif-4/wght.css";
-import "@fontsource-variable/source-serif-4/wght-italic.css";
 
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -7,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { Mark } from "@/components/Mark";
 import { ReaderControls } from "@/components/ReaderControls";
+import { serif } from "@/lib/fonts";
 import { getArticle } from "@/lib/feeds";
 import { getWire } from "@/lib/load";
 import { SITE_NAME } from "@/lib/site";
@@ -46,7 +45,7 @@ export default async function ReaderPage({ params }: PageProps<"/read/[id]">) {
   const iso = new Date(story.publishedAt).toISOString();
 
   return (
-    <div className="reader">
+    <div className={`reader ${serif.variable}`}>
       <a className="skip-link" href="#main">
         Skip to the article
       </a>
