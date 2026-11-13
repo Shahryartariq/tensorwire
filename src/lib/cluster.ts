@@ -26,12 +26,16 @@ export interface WordStats {
   exclusive: (word: string) => boolean;
   /** A word few headlines use ("Hydrogen", "healthcare"), unlike "Google", "Gemini" or "launches". */
   distinctive: (word: string) => boolean;
+  /** A word that is fairly uncommon ("decision", "API"): a few dozen headlines at most. */
+  uncommon: (word: string) => boolean;
 }
 
 /**
  * Two stories report the same news when:
  * - their headlines share at least two words and at least one of them is distinctive, and the
  *   shared words make up enough of the headlines ("Gemini 4 Hydrogen" in both); or
+ * - their headlines share at least three words, one of them fairly uncommon, and those make up
+ *   nearly a third of the headlines ("Gemini Decisions API"); or
  * - they share at least two words that no other story on the wire uses ("Pando", "FlashProve").
  *   A shared word counts 2 when it is in both headlines, 1 when it is in one, and 0.5 when it is
  *   only in the summaries; the total must reach 2.
@@ -47,6 +51,7 @@ export function sameNews(a: Prepared, b: Prepared, words: WordStats): boolean {
   const union = new Set([...a.title, ...b.title]).size;
   if (rare.length >= 1 && inTitles.length >= 2 && inTitles.length / union >= 0.2) return true;
   if (rare.length >= 2) return true;
+  if (inTitles.length >= 3 && inTitles.some(words.uncommon) && inTitles.length / union >= 0.3) return true;
 
   const only = shared(a.all, b.all).filter(words.exclusive);
   if (only.length < 2) return false;
@@ -84,6 +89,7 @@ export function clusterStories(stories: Story[], sources: Map<string, Source>): 
   const words: WordStats = {
     exclusive: (word) => df.get(word) === 2 && word.length >= 3,
     distinctive: (word) => (titleDf.get(word) ?? 0) <= rareLimit && word.length >= 3,
+    uncommon: (word) => (titleDf.get(word) ?? 0) <= rareLimit * 3 && word.length >= 3,
   };
 
   const pairs: [number, number][] = [];

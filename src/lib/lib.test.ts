@@ -259,7 +259,11 @@ describe("grouping", () => {
     const padding = Array.from({ length: 1000 }, (_, i) =>
       story(SOURCES[i % SOURCES.length].slug, `Google ${["launches", "releases", "brings"][i % 3]} Gemini update ${i} for ${["Docs", "Maps", "Chrome", "Pixel"][i % 4]} users`, -60 - i / 10),
     );
-    const groups = clusterStories([...gemini, ...padding], SOURCE_MAP);
+    // "Decision" and "API" are in a couple of dozen headlines on the real wire: uncommon, not rare.
+    const fairlyCommon = Array.from({ length: 20 }, (_, i) =>
+      story(SOURCES[(i * 7) % SOURCES.length].slug, i % 2 ? `New API ${i} for ${["billing", "search"][i % 2]} teams` : `Board decision ${i} on chip exports`, -100 - i),
+    );
+    const groups = clusterStories([...gemini, ...padding, ...fairlyCommon], SOURCE_MAP);
     const titlesWith = (word: string) =>
       groups.find((c) => c.stories.some((s) => s.title.includes(word)))!.stories.map((s) => s.title);
     expect(titlesWith("Decisions")).toHaveLength(4);
