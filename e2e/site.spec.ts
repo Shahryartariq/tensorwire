@@ -33,7 +33,7 @@ async function noHorizontalScroll(page: Page) {
 test.describe("front page", () => {
   test("leads with the most covered story and lists the rest by age", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1, name: "Today in AI" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Today's AI news" })).toBeVisible();
 
     const lead = page.locator(".lead");
     await expect(lead.getByRole("heading", { level: 2 })).toContainText("FlashProve");
@@ -238,7 +238,7 @@ test.describe("search engines", () => {
       expect((await request.get(path)).status(), path).toBe(404);
     }
     await page.goto("/topic/nope");
-    await expect(page.getByRole("heading", { level: 1, name: "This page isn’t on the wire" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Go to today’s news" })).toBeVisible();
   });
 });
@@ -386,6 +386,10 @@ test.describe("reader view", () => {
     // Both buttons sit together under the summary, the reader one first.
     const both = page.locator(".story-actions", { has: page.locator(".reader-link") }).first();
     await expect(both.getByRole("link")).toHaveText([/^Read here.*\d+ min$/, /^Read on .+ ↗$/]);
+    // The buttons keep their size next to a long "Also reported by" list (they once stretched to fill it).
+    for (const box of await page.locator(".lead .story-actions a").evaluateAll((els) => els.map((el) => el.getBoundingClientRect().height))) {
+      expect(box).toBeLessThan(60);
+    }
     // The lead gets the same pair; "Read on" goes where the headline goes.
     const lead = page.locator(".lead");
     await expect(lead.locator(".story-actions .reader-link")).toHaveAttribute("href", /^\/read\//);

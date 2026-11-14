@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { clusterStories, leadCluster, mostCovered } from "./cluster";
 import { SAMPLE_NOW, sampleItems } from "./sample";
 import { SOURCES, sourceBySlug } from "./sources";
-import { MAX_AGE, PER_SOURCE, toStories } from "./stories";
+import { MAX_AGE, PER_SOURCE, isNews, toStories } from "./stories";
 import { excerpt, hashId, plainText, safeUrl, tokens, urlKey } from "./text";
 import { ago, agoLong, bucketize, formatDate } from "./time";
 import { TOPICS, topicBySlug, topicsFor } from "./topics";
@@ -135,6 +135,48 @@ describe("stories", () => {
   });
 });
 
+describe("not news", () => {
+  // Real headlines from the wire on 13 Nov 2026.
+  it("drops tutorials, listicles, explainers and promotions", () => {
+    for (const title of [
+      "5 FREE Open-Source Alternatives to Jev",
+      "7 FREE Books to Learn About Building AI Systems",
+      "9 Key LLM Inference Metrics Explained in 5 Minutes",
+      "5 Techniques for Fine-Tuning LLMs Without Breaking the Bank",
+      "How to Use AI for Enterprise BI",
+      "How to Check Local LLM Output with Ollama, Gemma 4, and Nimble",
+      "How to use Claude AI for Investing and Equity Research",
+      "A Practical Blueprint for an AI-Ready Enterprise",
+      "A Jev of All Trades: Build and Train a Jev-style Decision Model From Scratch",
+      "What Is Reward Hacking? When AI Optimizes the Metric Instead of the Goal",
+      "Presentation: Opening the Black Box: Critical Explainability for AI Agent Tool Selection",
+      "What to expect during SC26: Join theCUBE Nov. 17–19",
+      "3 ways AI is changing the healthcare revenue cycle",
+      "5 apps I need Siri AI to work with now that it's open to third-party developers",
+    ]) {
+      expect(isNews(title), title).toBe(false);
+    }
+  });
+
+  it("keeps news, including headlines that start with numbers or 'How'", () => {
+    for (const title of [
+      "How LinkedIn, Netflix & DoorDash Run Agents, Evals & Inference in Production: QCon AI New York 2026",
+      "Google Finds That Technical Debt Can Derail Coding Agents through \"Agent Distraction\"",
+      "Jensen Huang Resigns as Nvidia CEO",
+      "Introducing Gemini 4 Hydrogen",
+      "AI agent tooling provider LangChain secures $300M investment",
+      "I Mutation-Tested 50 Python Libraries. Tests in the Young Ones Missed 41% of Planted Faults.",
+      "Humanoid Robots Are Coming to Factories. Who Is Responsible When They Fail?",
+      "Why Agentic AI Projects Get Canceled, and What an Eight-Week Pilot Gets Right",
+      "2 million developers now use Codex every week",
+      "50 AI agents tried to build a thriving Minecraft civilization – it didn't end well",
+      "OpenAI reportedly raises an additional $11 billion at a $1.25 trillion valuation",
+    ]) {
+      expect(isNews(title), title).toBe(true);
+    }
+  });
+});
+
 describe("topics", () => {
   it("has unique slugs and a description for every topic", () => {
     expect(new Set(TOPICS.map((t) => t.slug)).size).toBe(TOPICS.length);
@@ -186,6 +228,48 @@ describe("grouping", () => {
   it("doesn't merge different stories that share common words", () => {
     expect(groupOf("Claude’s new rules against game cloning").stories).toHaveLength(1);
     expect(groupOf("Building ultra-low-latency voice AI").stories).toHaveLength(1);
+  });
+
+  it("doesn't chain different launches together through common words", () => {
+    // Headlines from the live wire on 13 Nov 2026: three Google launches in one week.
+    const at = Date.UTC(2026, 10, 12, 12);
+    const story = (source: string, title: string, hours: number): Story => ({
+      id: hashId(`${source}:${title}`),
+      source,
+      title,
+      url: `https://example.com/${hashId(title)}`,
+      publishedAt: at + hours * 3_600_000,
+      topics: [],
+    });
+    const gemini = [
+      story("google-ai", "Gemini Decisions API: Fast, calibrated multimodal decisions", 0),
+      story("marktechpost", "Google Launches Gemini Decisions API With Gemini Decision 1 at $0.10/M Tokens", 3),
+      story("simon-willison", "Gemini Decisions API", 4),
+      story("siliconangle", "Google enters decision model market with Gemini Decisions API", 5),
+      story("google-deepmind", "Introducing Gemini 4 Hydrogen", -20),
+      story("google-ai", "Google Search gets a major upgrade with Gemini 4 Hydrogen", -19),
+      story("ars-technica", "Google rolls out Gemini 4 Hydrogen, finally replacing 3.8 Flash", -18),
+      story("siliconangle", "Google releases Gemini 4 Hydrogen, a lower-cost model said to outscore Argon", -17),
+      story("analytics-india", "Google Launches Gemini 4 Hydrogen for Faster Coding and AI Workflows", -16),
+      story("marktechpost", "Google Releases Gemini 4 Hydrogen: 2.5x Faster Than Gemini 3.8 Flash", -15),
+      story("google-cloud-ai", "Introducing Gemini for healthcare", -40),
+      story("techcrunch", "Google Cloud launches Gemini for healthcare", -38),
+    ];
+    // Padding to the size of the real wire, where "Google", "Gemini" and "launches" are common.
+    const padding = Array.from({ length: 1000 }, (_, i) =>
+      story(SOURCES[i % SOURCES.length].slug, `Google ${["launches", "releases", "brings"][i % 3]} Gemini update ${i} for ${["Docs", "Maps", "Chrome", "Pixel"][i % 4]} users`, -60 - i / 10),
+    );
+    // "Decision" and "API" are in a couple of dozen headlines on the real wire: uncommon, not rare.
+    const fairlyCommon = Array.from({ length: 20 }, (_, i) =>
+      story(SOURCES[(i * 7) % SOURCES.length].slug, i % 2 ? `New API ${i} for ${["billing", "search"][i % 2]} teams` : `Board decision ${i} on chip exports`, -100 - i),
+    );
+    const groups = clusterStories([...gemini, ...padding, ...fairlyCommon], SOURCE_MAP);
+    const titlesWith = (word: string) =>
+      groups.find((c) => c.stories.some((s) => s.title.includes(word)))!.stories.map((s) => s.title);
+    expect(titlesWith("Decisions")).toHaveLength(4);
+    expect(titlesWith("Hydrogen")).toHaveLength(6);
+    expect(titlesWith("healthcare")).toHaveLength(2);
+    expect(titlesWith("Hydrogen").every((t) => t.includes("Hydrogen"))).toBe(true);
   });
 
   it("never groups round-up newsletters or two stories from one source", () => {

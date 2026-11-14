@@ -23,7 +23,7 @@ export default function AboutPage() {
         <div className="band-inner">
           <h1>About Tensorwire</h1>
           <div className="band-intro">
-            <p>One page for the day&apos;s AI news, so you can see what happened without opening eighteen tabs.</p>
+            <p>One page for the day&apos;s AI news, so you can see what happened without opening dozens of tabs.</p>
           </div>
         </div>
       </div>
@@ -42,6 +42,12 @@ export default function AboutPage() {
           publishers&apos; websites.
         </p>
 
+        <h2>What&apos;s left out</h2>
+        <p>
+          Tutorials, listicles, explainers, recorded talks and event promotions are dropped, so the page stays on what
+          happened. The labs&apos; own posts are always kept. If a real story was dropped, please report it (see below).
+        </p>
+
         <h2>How stories are grouped</h2>
         <p>
           When several sources report the same news, it appears once. The original announcement leads when a lab
@@ -57,8 +63,9 @@ export default function AboutPage() {
           </li>
         </ul>
         <p>
-          Grouping is automatic: two stories go together when their headlines share most of their words, or when both
-          use names no other story uses. It sometimes misses a match; it rarely makes a wrong one.
+          Grouping is automatic: two stories go together when their headlines share a name few other headlines use
+          (&ldquo;Gemini 4 Hydrogen&rdquo;, not just &ldquo;Google&rdquo; or &ldquo;Gemini&rdquo;). It sometimes misses a match; it
+          rarely makes a wrong one.
         </p>
 
         <h2>Labels</h2>

@@ -11,7 +11,7 @@ export default function NotFound() {
     <Frame>
       <div className="band band-short">
         <div className="band-inner">
-          <h1>This page isn’t on the wire</h1>
+          <h1>Page not found</h1>
           <div className="band-intro">
             <p>The address may be mistyped, or the page has moved. The latest news is on the front page.</p>
           </div>

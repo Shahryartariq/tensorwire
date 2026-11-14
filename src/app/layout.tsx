@@ -1,4 +1,3 @@
-import "@fontsource-variable/schibsted-grotesk";
 import "./globals.css";
 
 import { GoogleAnalytics } from "@next/third-parties/google";
@@ -6,6 +5,7 @@ import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 
 import { measurementId } from "@/lib/analytics";
+import { sans } from "@/lib/fonts";
 import { AUTHOR, SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
 import { THEME_COLOR, themeScript } from "@/lib/theme";
 
@@ -43,7 +43,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const gaId = measurementId();
   return (
     // The head script sets data-theme before React hydrates, so <html> may differ from the server's.
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={sans.variable} suppressHydrationWarning>
       <head>
         {/* Applies a saved light or dark theme before the first paint. Allowed by the CSP nonce. */}
         <script nonce={nonce} suppressHydrationWarning dangerouslySetInnerHTML={{ __html: themeScript }} />

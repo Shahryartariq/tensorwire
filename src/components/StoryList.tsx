@@ -31,8 +31,6 @@ export function StoryRow({ cluster, now }: { cluster: Cluster; now: number }) {
         <h3 className="story-title">
           <a href={lead.url}>{lead.title}</a>
         </h3>
-        {lead.summary && <p className="story-summary">{lead.summary}</p>}
-        <StoryActions cluster={cluster} />
         <div className="story-meta">
           <Coverage count={cluster.sources.length} />
           <a href={`/source/${lead.source}`} className="story-source">
@@ -66,6 +64,8 @@ export function StoryRow({ cluster, now }: { cluster: Cluster; now: number }) {
             </span>
           )}
         </div>
+        {lead.summary && <p className="story-summary">{lead.summary}</p>}
+        <StoryActions cluster={cluster} />
       </div>
     </li>
   );

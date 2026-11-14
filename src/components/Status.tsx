@@ -4,7 +4,7 @@ import { SOURCES } from "@/lib/sources";
 import { agoLong } from "@/lib/time";
 import type { Wire } from "@/lib/types";
 
-/** "18 sources, newest story 12 minutes ago." Mentions sources that failed to load. */
+/** "58 sources, newest story 12 minutes ago." Mentions sources that failed to load. */
 export function Status({ wire }: { wire: Wire }) {
   const working = wire.feeds.filter((f) => f.ok).length;
   const newest = wire.stories[0]?.publishedAt;

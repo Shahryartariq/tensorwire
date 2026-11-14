@@ -2,7 +2,7 @@
 
 **Live: [tensorwire.vercel.app](https://tensorwire.vercel.app)**
 
-Today's AI news on one page. Tensorwire reads 59 feeds, from AI labs, newsrooms and independent builders, every 15 minutes. When several outlets report the same news, it shows up once with every source listed, and the story most outlets are covering leads the page.
+Today's AI news on one page. Tensorwire reads 58 feeds, from AI labs, newsrooms and independent builders, every 15 minutes. When several outlets report the same news, it shows up once with every source listed, and the story most outlets are covering leads the page.
 
 <p align="center">
   <img src="docs/screenshot.png" alt="Tensorwire front page: the most covered story in a navy band, then the latest AI news grouped by age, with coverage cells, sources and topics" width="72%">
@@ -12,19 +12,20 @@ Today's AI news on one page. Tensorwire reads 59 feeds, from AI labs, newsrooms 
 
 | Lighthouse | Performance | Accessibility | Best practices | SEO |
 |---|---|---|---|---|
-| Mobile | 96–99 | 100 | 100 | 100 |
+| Mobile | 92–97 | 100 | 100 | 100 |
 | Desktop | 100 | 100 | 100 | 100 |
 
 ## Features
 
 - **One story, all its coverage.** Reports of the same news are grouped automatically. The lab's own post leads when there is one, and the other coverage is listed under it.
+- **News only.** Tutorials, listicles ("7 free books to…"), explainers, talks and event promotions are left out, so the page stays on what happened. The labs' own posts are always kept.
 - **Coverage cells.** A row of up to four cells shows how many sources picked up a story, so the big stories stand out as you scroll.
 - **Official posts are marked**, so an announcement is never confused with reporting about it. [From the labs](https://tensorwire.vercel.app/labs) shows only those.
 - **Eight topics:** models, agents, open source, research, products, chips and compute, policy and safety, business. Each has its own page.
 - **A page per source** and a [sources page](https://tensorwire.vercel.app/sources) showing whether each feed loaded on its last check.
 - **Search** across headlines and summaries from the last three weeks.
 - **New since your last visit:** stories that arrived since you last looked are marked. Only a timestamp is stored, in your browser.
-- **Reader view:** when a feed carries the whole post, the story gets a "Read here · 4 min" link. It opens the text alone on a quiet page: no menus, sidebar or footer, a serif reading font, a reading-progress bar, and text size, typeface and theme settings that are remembered. The text comes only from the publisher's own feed (never scraped from their website), images and embeds stay on the original, every page links to it, and reader pages are kept out of search engines. The [sources page](https://tensorwire.vercel.app/sources) shows which feeds carry full posts.
+- **Two ways to read:** every story has a "Read on <publisher>" button. When the feed carries the whole post, it also gets "Read here · 4 min", the reader view. It opens the text alone on a quiet page: no menus, sidebar or footer, a serif reading font, a reading-progress bar, and text size, typeface and theme settings that are remembered. The text comes only from the publisher's own feed (never scraped from their website), images and embeds stay on the original, every page links to it, and reader pages are kept out of search engines. The [sources page](https://tensorwire.vercel.app/sources) shows which feeds carry full posts.
 - **Light, dark or system theme:** switch in the header. Your choice is saved in your browser and applied before the page paints, so a dark page never flashes white. Without a choice, the site follows your system setting.
 - **Its own [RSS feed](https://tensorwire.vercel.app/feed.xml)** with each story once.
 - **Works without JavaScript.**
@@ -33,7 +34,7 @@ Today's AI news on one page. Tensorwire reads 59 feeds, from AI labs, newsrooms 
 
 | Labs and companies | Newsrooms | Builders and newsletters |
 |---|---|---|
-| OpenAI, Google DeepMind, Google AI blog, Google Research, Hugging Face, Microsoft Research, NVIDIA, NVIDIA Technical Blog, AWS Machine Learning, Apple Machine Learning Research, Meta Engineering, Google Cloud AI, Amazon Science, IBM Research, Ai2, GitHub, Cloudflare, Databricks, Together AI, Replicate, Pinecone | TechCrunch, The Verge, MIT Technology Review, Ars Technica, Wired, MarkTechPost, The Register, ZDNET, IEEE Spectrum, SiliconANGLE, MIT News, InfoQ, Unite.AI, Futurism, 404 Media, Engadget, Analytics India Magazine, KDnuggets, Towards Data Science | Simon Willison, Latent Space, Import AI, Hacker News (LLM posts with 100+ points), Interconnects, One Useful Thing, Ahead of AI, Andrej Karpathy, Hamel Husain, Understanding AI, AI as Normal Technology, Gary Marcus, SemiAnalysis, Chips and Cheese, The Algorithmic Bridge, AI Supremacy, Exponential View, Don't Worry About the Vase, Ben's Bites |
+| OpenAI, Google DeepMind, Google AI blog, Google Research, Hugging Face, Microsoft Research, NVIDIA, NVIDIA Technical Blog, AWS Machine Learning, Apple Machine Learning Research, Meta Engineering, Google Cloud AI, Amazon Science, IBM Research, Ai2, GitHub, Cloudflare, Databricks, Together AI, Replicate, Pinecone | TechCrunch, The Verge, MIT Technology Review, Ars Technica, Wired, MarkTechPost, The Register, ZDNET, IEEE Spectrum, SiliconANGLE, MIT News, InfoQ, Unite.AI, Futurism, 404 Media, Engadget, Analytics India Magazine, Towards Data Science | Simon Willison, Latent Space, Import AI, Hacker News (LLM posts with 100+ points), Interconnects, One Useful Thing, Ahead of AI, Andrej Karpathy, Hamel Husain, Understanding AI, AI as Normal Technology, Gary Marcus, SemiAnalysis, Chips and Cheese, The Algorithmic Bridge, AI Supremacy, Exponential View, Don't Worry About the Vase, Ben's Bites |
 
 General tech feeds (Engadget, 404 Media, ZDNET) and broad company blogs keep only their AI stories. Weekly round-ups (Exponential View, Zvi, Ben's Bites, Import AI) never join a story group, because they cover many stories at once. Every feed was tested from Vercel before it was added: feeds that block Vercel, are stale or have moved (Anthropic, Mistral, VentureBeat, The Decoder and others) are left out.
 
@@ -55,7 +56,7 @@ Tensorwire shows each story's headline, a short excerpt when the feed provides o
 ## How it works
 
 ```
-59 RSS/Atom feeds ──▶ fetch + parse ──▶ clean + filter ──▶ topics ──▶ group ──▶ pages, RSS, sitemap
+58 RSS/Atom feeds ──▶ fetch + parse ──▶ clean + filter ──▶ topics ──▶ group ──▶ pages, RSS, sitemap
                       (each cached       (plain text,       (keyword   (same news
                        15 minutes)        safe URLs,         rules)     → one story)
                                           per-source rules)
@@ -157,7 +158,7 @@ src/
   components/                 Frame, lead story, story list, coverage cells, side panels,
                               theme switch, reader settings
   lib/
-    sources.ts                The 59 feeds and their filters
+    sources.ts                The 58 feeds and their filters
     feeds.ts                  Fetching and caching (server only)
     parse.ts                  RSS and Atom parsing
     reader.ts                 Reader view: cleaning feed HTML, reading time
