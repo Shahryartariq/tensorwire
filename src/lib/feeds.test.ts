@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { readAllFeeds, readFeed, usingSampleData } from "./feeds";
+import { readAllFeeds, readCapped, readFeed, usingSampleData } from "./feeds";
 import { SOURCES } from "./sources";
 
 const RSS = `<?xml version="1.0"?><rss version="2.0"><channel><title>T</title>
@@ -72,5 +72,26 @@ describe("sample data", () => {
     // A source can be empty when everything it published was a tutorial or a listicle.
     expect(feeds.filter((f) => f.stories.length > 0).length).toBeGreaterThanOrEqual(SOURCES.length - 2);
     expect(fetch).not.toHaveBeenCalled();
+  });
+});
+
+describe("readCapped", () => {
+  const body = (chunks: string[], length?: number) =>
+    new Response(
+      new ReadableStream({
+        start(controller) {
+          for (const c of chunks) controller.enqueue(new TextEncoder().encode(c));
+          controller.close();
+        },
+      }),
+      length ? { headers: { "content-length": String(length) } } : undefined,
+    );
+
+  it("reads a body under the limit", async () => {
+    await expect(readCapped(body(["<rss>", "</rss>"]), 100)).resolves.toBe("<rss></rss>");
+  });
+
+  it("stops a body that grows past the limit, whatever Content-Length said", async () => {
+    await expect(readCapped(body(["x".repeat(60), "x".repeat(60)], 10), 100)).rejects.toThrow("Feed is too large");
   });
 });

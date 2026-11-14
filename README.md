@@ -12,7 +12,7 @@ Today's AI news on one page. Tensorwire reads 58 feeds, from AI labs, newsrooms 
 
 | Lighthouse | Performance | Accessibility | Best practices | SEO |
 |---|---|---|---|---|
-| Mobile | 92–97 | 100 | 100 | 100 |
+| Mobile | 93–99 | 100 | 100 | 100 |
 | Desktop | 100 | 100 | 100 | 100 |
 
 ## Features
@@ -49,8 +49,8 @@ Tensorwire shows each story's headline, a short excerpt when the feed provides o
 | UI | React 19, hand-written CSS, Schibsted Grotesk self-hosted from npm |
 | Feeds | RSS 2.0, RSS 1.0 and Atom parsed with [fast-xml-parser](https://github.com/NaturalIntelligence/fast-xml-parser); text cleaned with [entities](https://github.com/fb55/entities) |
 | Caching | `unstable_cache` per feed, 15 minutes, on the Vercel Data Cache |
-| Tests | Vitest (68 unit and API tests), Playwright (78 end-to-end runs on desktop and mobile), axe-core accessibility checks |
-| CI | GitHub Actions: lint, type check, unit tests, build, end-to-end tests |
+| Tests | Vitest (80 unit and API tests), Playwright (95 end-to-end runs on desktop and mobile), axe-core accessibility checks |
+| CI | GitHub Actions: dependency audit, lint, type check, unit tests, build, end-to-end tests; Dependabot weekly |
 | Hosting | Vercel |
 
 ## How it works
@@ -71,10 +71,13 @@ Tensorwire shows each story's headline, a short excerpt when the feed provides o
 
 Two stories from different sources, published within three days of each other, are the same news when:
 
-1. their headlines share at least three words and 30% of all their words, or
-2. they share at least two words that **no other story on the wire uses**. Each word scores 2 if it is in both headlines, 1 if it is in one, and 0.5 if it is only in the summaries, and the total must reach 2.
+1. their headlines share a word that few other headlines use (about 1% of them, like *Hydrogen*, unlike *Google* or *Gemini*), plus at least one more word; or
+2. their headlines share three words, one of them fairly uncommon (*decision*, *API*), making up nearly a third of the headlines; or
+3. they share at least two words that **no other story on the wire uses**. Each word scores 2 if it is in both headlines, 1 if it is in one, and 0.5 if it is only in the summaries, and the total must reach 2.
 
-The second rule catches "Scaling Git at OpenAI" and "OpenAI Introduces Pando: A Git Backend…", which share the rare words *Pando*, *Git* and *backend*. It ignores "Claude's new rules against game cloning" and "How 'reverse game theory' could keep AI agents in check", whose shared words (*game*, *rules*) appear elsewhere too. Round-up newsletters never join a group, because they mention everything. The unit tests pin these cases on a saved snapshot of the real feeds.
+The third rule catches "Scaling Git at OpenAI" and "OpenAI Introduces Pando: A Git Backend…", which share the rare words *Pando*, *Git* and *backend*. It ignores "Claude's new rules against game cloning" and "How 'reverse game theory' could keep AI agents in check", whose shared words (*game*, *rules*) appear elsewhere too. Round-up newsletters never join a group, because they mention everything. The unit tests pin these cases on a saved snapshot of the real feeds.
+
+Groups only join when most of their stories match each other, so a chain of loose matches (A like B, B like C) never pulls unrelated news together. Three different Google launches in one week stay three stories.
 
 ## SEO
 
