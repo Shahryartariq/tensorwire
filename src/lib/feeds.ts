@@ -42,9 +42,29 @@ async function fetchFeed(url: string): Promise<string> {
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   if (Number(response.headers.get("content-length") ?? 0) > MAX_BYTES) throw new FeedError("Feed is too large");
-  const xml = await response.text();
-  if (xml.length > MAX_BYTES) throw new FeedError("Feed is too large");
-  return xml;
+  return readCapped(response, MAX_BYTES);
+}
+
+/**
+ * The body as text, stopping as soon as it passes `max` bytes. A missing or wrong
+ * Content-Length can't make the server hold a huge response in memory.
+ */
+export async function readCapped(response: Response, max: number): Promise<string> {
+  if (!response.body) return "";
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) {
+      await reader.cancel();
+      throw new FeedError("Feed is too large");
+    }
+    chunks.push(value);
+  }
+  return new TextDecoder().decode(Buffer.concat(chunks));
 }
 
 /** Reads and cleans one feed. Never throws: a failure is reported in the result. */

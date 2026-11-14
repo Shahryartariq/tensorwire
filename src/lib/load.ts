@@ -44,18 +44,31 @@ export function official(cluster: Cluster): boolean {
 }
 
 /** Simple full-text search over headlines and summaries. Every word must appear. */
-export function search(clusters: Cluster[], query: string): Cluster[] {
-  const words = query
+/** The words of a search: up to 8, two characters or more, letters, digits and . + # - only. */
+export function searchWords(query: string): string[] {
+  return query
     .toLowerCase()
     .split(/\s+/)
     .map((w) => w.replace(/[^\p{L}\p{N}.+#-]/gu, ""))
     .filter((w) => w.length > 1)
     .slice(0, 8);
+}
+
+// Only "." and "+" are special in a regular expression; "#" and "-" must not be escaped in "u" mode.
+const escape = (word: string) => word.replace(/[.+]/g, "\\$&");
+
+/**
+ * Stories whose headline or summary has every word, each at the start of a word: "agent" finds
+ * "agents" and "AI-agent", "ai" finds "AI" but not "said".
+ */
+export function search(clusters: Cluster[], query: string): Cluster[] {
+  const words = searchWords(query);
   if (words.length === 0) return [];
+  const patterns = words.map((word) => new RegExp(`(?<![\\p{L}\\p{N}])${escape(word)}`, "u"));
   return clusters.filter((cluster) =>
     cluster.stories.some((story) => {
       const haystack = `${story.title} ${story.summary ?? ""}`.toLowerCase();
-      return words.every((word) => haystack.includes(word));
+      return patterns.every((pattern) => pattern.test(haystack));
     }),
   );
 }

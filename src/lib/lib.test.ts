@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { clusterStories, leadCluster, mostCovered } from "./cluster";
+import { search, searchWords } from "./load";
 import { SAMPLE_NOW, sampleItems } from "./sample";
 import { SOURCES, sourceBySlug } from "./sources";
 import { MAX_AGE, PER_SOURCE, isNews, toStories } from "./stories";
 import { excerpt, hashId, plainText, safeUrl, tokens, urlKey } from "./text";
 import { ago, agoLong, bucketize, formatDate } from "./time";
 import { TOPICS, topicBySlug, topicsFor } from "./topics";
-import type { RawItem, Source, Story } from "./types";
+import type { Cluster, RawItem, Source, Story } from "./types";
 
 const HOUR = 3_600_000;
 const NOW = Date.UTC(2026, 10, 4, 6);
@@ -132,6 +133,39 @@ describe("stories", () => {
   it("keeps a discussion link when the feed has one", () => {
     const [story] = toStories(testSource, [item({ comments: "https://news.ycombinator.com/item?id=1" })], NOW);
     expect(story.discussion).toBe("https://news.ycombinator.com/item?id=1");
+  });
+});
+
+describe("search", () => {
+  const at = Date.UTC(2026, 10, 12);
+  const cluster = (title: string, summary?: string): Cluster => {
+    const story: Story = { id: hashId(title), source: "techcrunch", title, summary, url: "https://example.com", publishedAt: at, topics: [] };
+    return { id: story.id, lead: story, stories: [story], sources: ["techcrunch"], latest: at, topics: [] };
+  };
+  const wire = [
+    cluster("OpenAI said it will ship agents"),
+    cluster("New AI rules in the EU"),
+    cluster("C# gets an AI-powered compiler"),
+    cluster("GPT-5.1 benchmarks", "Scores on SWE-bench"),
+  ];
+  const titles = (q: string) => search(wire, q).map((c) => c.lead.title);
+
+  it("matches the start of words, not the middle", () => {
+    expect(titles("ai")).toEqual(["New AI rules in the EU", "C# gets an AI-powered compiler"]);
+    expect(titles("agent")).toEqual(["OpenAI said it will ship agents"]);
+    expect(titles("openai")).toEqual(["OpenAI said it will ship agents"]);
+  });
+
+  it("handles symbols in model and language names", () => {
+    expect(titles("gpt-5.1")).toEqual(["GPT-5.1 benchmarks"]);
+    expect(titles("c#")).toEqual(["C# gets an AI-powered compiler"]);
+    expect(titles("swe-bench")).toEqual(["GPT-5.1 benchmarks"]);
+  });
+
+  it("needs every word and ignores one-letter words", () => {
+    expect(titles("ai eu")).toEqual(["New AI rules in the EU"]);
+    expect(searchWords("a")).toEqual([]);
+    expect(titles("a")).toEqual([]);
   });
 });
 
