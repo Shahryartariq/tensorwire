@@ -3,7 +3,7 @@ export const SITE_NAME = "Tensorwire";
 export const TAGLINE = "AI news from the labs and the press, in one fast feed.";
 
 export const SITE_DESCRIPTION =
-  "Today's AI news in one place: model releases, research, agents, chips and policy from OpenAI, Google DeepMind, Hugging Face, TechCrunch, The Verge and over 50 more sources. Updated every 15 minutes.";
+  "Today's AI news in one place: model releases, research, agents, chips and policy from OpenAI, Google DeepMind and 50+ more sources. Updated every 15 minutes.";
 
 export const AUTHOR = { name: "Muhammad Shehryar", url: "https://github.com/Shahryartariq" };
 export const SOURCE_URL = "https://github.com/Shahryartariq/tensorwire";

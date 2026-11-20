@@ -5,7 +5,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { Mark } from "@/components/Mark";
 import { ReaderControls } from "@/components/ReaderControls";
-import { serif } from "@/lib/fonts";
+import { serif } from "@/lib/serif";
 import { getArticle } from "@/lib/feeds";
 import { getWire } from "@/lib/load";
 import { SITE_NAME } from "@/lib/site";
@@ -20,7 +20,8 @@ async function findStory(id: string) {
 
 export async function generateMetadata({ params }: PageProps<"/read/[id]">): Promise<Metadata> {
   const story = await findStory((await params).id);
-  if (!story) return {};
+  // Decided here, before anything streams, so the 404 page is in the HTML and not only in the script.
+  if (!story) notFound();
   return {
     title: story.title,
     description: story.summary ?? `${story.title}, from ${sourceName(story.source)}.`,

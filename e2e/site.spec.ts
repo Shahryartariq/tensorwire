@@ -183,10 +183,59 @@ test.describe("search", () => {
     await expectAccessible(page);
   });
 
+  test("asks for a longer query instead of saying nothing matches", async ({ page }) => {
+    await page.goto("/search?q=a");
+    await expect(page.getByText("Use at least two letters or digits.")).toBeVisible();
+    await expect(page.locator(".story")).toHaveCount(0);
+  });
+
+  test("puts the query in the page title", async ({ page }) => {
+    await page.goto("/search?q=openai");
+    await expect(page).toHaveTitle(/“openai”: search/);
+  });
+
   test("treats markup in the query as text", async ({ page }) => {
     await page.goto("/search?q=%3Cimg%20src%3Dx%20onerror%3Dalert(1)%3E");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("<img src=x onerror=alert(1)>");
     await expect(page.locator("main img")).toHaveCount(0);
+  });
+});
+
+test.describe("older pages", () => {
+  test("the front page goes on to older stories, and back", async ({ page }) => {
+    await page.goto("/");
+    const pager = page.getByRole("navigation", { name: "Pages" });
+    await expect(pager.getByText(/^Page 1 of \d+$/)).toBeVisible();
+    await expect(pager.getByRole("link", { name: /Newer stories/ })).toHaveCount(0);
+    await pager.getByRole("link", { name: /Older stories/ }).click();
+    await expect(page).toHaveURL(/\/\?page=2$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Older AI news" })).toBeVisible();
+    // The lead story and the "new since" note belong to page 1 only.
+    await expect(page.locator(".lead")).toHaveCount(0);
+    await expect(page.locator(".story")).not.toHaveCount(0);
+    await page.getByRole("navigation", { name: "Pages" }).getByRole("link", { name: /Newer stories/ }).click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("later pages have their own title and stay out of search results", async ({ page }) => {
+    await page.goto("/?page=2");
+    await expect(page).toHaveTitle(/Older AI news \(page 2\)/);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/\?page=2$/);
+  });
+
+  test("page numbers that aren't numbers are 404s, rendered on the server", async ({ request }) => {
+    for (const path of ["/?page=0", "/?page=abc", "/labs?page=1.5", "/topic/models?page=-1", "/search?q=ai&page=x"]) {
+      const response = await request.get(path);
+      expect(response.status(), path).toBe(404);
+      expect(await response.text(), path).toMatch(/<h1[^>]*>Page not found<\/h1>/);
+    }
+  });
+
+  test("a page past the end goes to the last page there is", async ({ page }) => {
+    await page.goto("/labs?page=999");
+    await expect(page).toHaveURL(/\/labs(\?page=\d+)?$/);
+    await expect(page.locator(".story")).not.toHaveCount(0);
   });
 });
 
@@ -231,6 +280,12 @@ test.describe("search engines", () => {
     const feed = await request.get("/feed.xml");
     expect(feed.headers()["content-type"]).toContain("application/rss+xml");
     expect((await feed.text()).match(/<item>/g)).toHaveLength(50);
+  });
+
+  test("addresses with broken escapes are 404s, not server errors", async ({ request }) => {
+    for (const path of ["/topic/%E0%A4%A", "/source/%ZZ", "/read/%ZZ", "/%ZZ"]) {
+      expect((await request.get(path)).status(), path).toBe(404);
+    }
   });
 
   test("unknown pages return 404 with a way back", async ({ page, request }) => {
@@ -483,6 +538,14 @@ test.describe("reader view", () => {
     const response = await request.get(`/read/${id}`, { maxRedirects: 0 });
     expect(response.status()).toBe(307);
     expect(response.headers().location).toBe(url);
+  });
+
+  test("an expired story is a 404 with its own title, kept out of search engines", async ({ request }) => {
+    const response = await request.get("/read/zzzzzz");
+    expect(response.status()).toBe(404);
+    const html = await response.text();
+    expect(html).toMatch(/<title>Page not found · Tensorwire<\/title>/);
+    expect(html).toMatch(/<meta name="robots" content="noindex"/);
   });
 
   test("unknown or expired stories return 404", async ({ request }) => {

@@ -1,28 +1,40 @@
 import type { Metadata } from "next";
+import { notFound, redirect } from "next/navigation";
 
 import { Frame } from "@/components/Frame";
 import { Lead } from "@/components/Lead";
 import { NewSince } from "@/components/NewSince";
+import { Pager } from "@/components/Pager";
 import { AboutPanel, MostCovered, TopicIndex } from "@/components/Rail";
 import { Outage, Status } from "@/components/Status";
 import { StoryList } from "@/components/StoryList";
 import { leadCluster } from "@/lib/cluster";
 import { getWire } from "@/lib/load";
+import { pageCount, pageHref, paginate, pagedMeta, readPage } from "@/lib/paging";
 import { SITE_DESCRIPTION, SITE_NAME, absolute, jsonLd, pageMeta } from "@/lib/site";
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
   title: { absolute: `${SITE_NAME}: today's AI news from the labs and the press` },
   description: SITE_DESCRIPTION,
   ...pageMeta("/", `${SITE_NAME}: today's AI news`, SITE_DESCRIPTION),
 };
 
-/** Stories shown on the home page; older ones live on the topic and source pages. */
-const HOME_LIMIT = 50;
+export async function generateMetadata({ searchParams }: PageProps<"/">): Promise<Metadata> {
+  const page = readPage((await searchParams).page) ?? 1;
+  if (page === 1) return metadata;
+  return pagedMeta({ ...metadata, title: `Older AI news` }, "/", page);
+}
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }: PageProps<"/">) {
+  const page = readPage((await searchParams).page);
+  if (page === null) notFound();
   const wire = await getWire();
   const lead = leadCluster(wire.clusters, wire.now);
-  const rest = wire.clusters.filter((c) => c.id !== lead?.id).slice(0, HOME_LIMIT);
+  const others = wire.clusters.filter((c) => c.id !== lead?.id);
+  const paged = paginate(others, page);
+  if (!paged) redirect(pageHref("/", pageCount(others.length)));
+  const rest = paged.items;
+  const first = paged.page === 1;
 
   const structured = [
     {
@@ -41,7 +53,7 @@ export default async function HomePage() {
       "@context": "https://schema.org",
       "@type": "ItemList",
       name: "Latest AI news",
-      itemListElement: [lead, ...rest]
+      itemListElement: [first ? lead : undefined, ...rest]
         .filter((c) => c !== undefined)
         .slice(0, 10)
         .map((c, i) => ({ "@type": "ListItem", position: i + 1, url: c.lead.url, name: c.lead.title })),
@@ -54,11 +66,17 @@ export default async function HomePage() {
       <div className="band">
         <div className="band-inner">
           <div className="band-heading">
-            <h1>Today&apos;s AI news</h1>
+            <h1>{first ? <>Today&apos;s AI news</> : "Older AI news"}</h1>
             <Status wire={wire} />
-            <NewSince newest={wire.clusters[0]?.latest ?? 0} />
+            {first ? (
+              <NewSince newest={wire.clusters[0]?.latest ?? 0} />
+            ) : (
+              <p className="status">
+                Page {paged.page} of {paged.pages}
+              </p>
+            )}
           </div>
-          {lead && <Lead cluster={lead} now={wire.now} />}
+          {first && lead && <Lead cluster={lead} now={wire.now} />}
         </div>
       </div>
       <div className="columns">
@@ -66,7 +84,10 @@ export default async function HomePage() {
           {wire.stories.length === 0 ? (
             <Outage />
           ) : (
-            <StoryList clusters={rest} now={wire.now} empty={<p>No other stories yet.</p>} />
+            <>
+              <StoryList clusters={rest} now={wire.now} empty={<p>No other stories yet.</p>} />
+              <Pager path="/" page={paged.page} pages={paged.pages} />
+            </>
           )}
         </div>
         <aside className="column-side" aria-label="More ways in">
