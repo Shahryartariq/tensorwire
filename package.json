@@ -14,13 +14,13 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@next/third-parties": "^16.4.5",
+    "@next/third-parties": "^16.4.6",
     "entities": "^9.0.0",
-    "fast-xml-parser": "^5.12.0",
-    "next": "16.4.5",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "sanitize-html": "^2.18.1",
+    "fast-xml-parser": "^5.12.1",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "sanitize-html": "^2.18.2",
     "server-only": "^0.0.1"
   },
   "devDependencies": {
